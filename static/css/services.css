@@ -59,6 +59,17 @@ body {
   filter: brightness(0) invert(1);
   width: 95px;
   height: 85px;
+  transition: transform 0.1s, filter 0.1s;
+}
+
+.file-count-icon:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2) invert(1);
+}
+
+.file-count-icon:active {
+  transform: scale(0.95);
+  filter: brightness(0.8) invert(1);
 }
 
 /* Search Field Styles */

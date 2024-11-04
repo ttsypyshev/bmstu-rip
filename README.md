@@ -9,6 +9,7 @@
 
 ```sh
 sudo docker-compose up -d
+chmod +x start_app.sh
 ./start_app.sh && go run src/main.go
 ```
 

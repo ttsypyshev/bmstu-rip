@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func (app *App) SetupRoutes(r *gin.Engine) {
@@ -15,38 +16,38 @@ func (app *App) SetupRoutes(r *gin.Engine) {
 	r.GET("/info/:id", app.handleInfo)
 	r.GET("/project/:id", app.handleApp)
 	r.POST("/add-service", app.handleAddService)
-	r.POST("/upd-project", app.handleUpdateProject)
+	r.POST("/del-project", app.handleDeleteProject)
 }
 
 func (app *App) handleHome(c *gin.Context) {
-	langID, err := parseQueryParam(c, "langID")
+	langID, err := ParseQueryParam(c, "langID")
 	if err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid langID"), err)
 		return
 	}
 
-	status, err := parseQueryParam(c, "status")
+	status, err := ParseQueryParam(c, "status")
 	if err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid status"), err)
 		return
 	}
 
 	query := c.Query("langname")
-	filteredLangs, err := app.getFilteredLangs(query)
+	filteredLangs, err := app.GetFilteredLangs(query)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] failed to retrieve language information"), err)
 		return
 	}
 
-	count, err := app.CountFiles(app.userID)
+	projectID, err := FindLastDraft(app, app.userID)
 	if err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] project was not created"), err)
+		handleError(c, http.StatusNotFound, errors.New("[err] project was not created 1"), err)
 		return
 	}
 
-	projectID, err := findLastDraft(app, app.userID)
+	count, err := app.GetProjectCount(projectID)
 	if err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] project was not created"), err)
+		handleError(c, http.StatusNotFound, errors.New("[err] project was not created 2"), err)
 		return
 	}
 
@@ -69,16 +70,16 @@ func (app *App) handleInfo(c *gin.Context) {
 		return
 	}
 
-	info, err := app.GetLangByID(id)
+	lang, err := app.GetLangByID(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] language information not available"), err)
 		return
 	}
 
 	c.HTML(http.StatusOK, "information.tmpl", gin.H{
-		"Title": info.Name,
-		"Info":  info,
-		"List":  ParseList(info.List),
+		"Title": lang.Name,
+		"Info":  lang,
+		"List":  ParseList(lang.List),
 	})
 }
 
@@ -90,19 +91,21 @@ func (app *App) handleApp(c *gin.Context) {
 		return
 	}
 
-	project, err := app.GetProjectByID(id)
+	project, err := app.GetProjectByID(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] failed to retrieve project information"), err)
 		return
 	}
 
-	files, err := app.GetFilesForProject(id)
+	files, err := app.GetFilesForProject(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] failed to retrieve project files"), err)
 		return
 	}
 
-	langs, err := app.GetLangs()
+	langs, err := app.GetLangs(func(db *gorm.DB) *gorm.DB {
+		return db.Where("status = ?", true)
+	})
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] failed to retrieve language information"), err)
 		return
@@ -117,8 +120,8 @@ func (app *App) handleApp(c *gin.Context) {
 }
 
 type RequestAdd struct {
-	IDUser int `form:"id_user" json:"id_user"`
-	IDLang int `form:"id_lang" json:"id_lang"`
+	IDUser uint `form:"id_user" json:"id_user"`
+	IDLang uint `form:"id_lang" json:"id_lang"`
 }
 
 func (app *App) handleAddService(c *gin.Context) {
@@ -129,7 +132,7 @@ func (app *App) handleAddService(c *gin.Context) {
 	}
 	log.Printf("[info] AddService called : IDUser=%d, IDLang=%d", req.IDUser, req.IDLang)
 
-	projectID, err := createDraft(app, req.IDUser)
+	projectID, err := CreateDraft(app, req.IDUser)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] error creating project"), err)
 		return
@@ -145,21 +148,20 @@ func (app *App) handleAddService(c *gin.Context) {
 	c.Redirect(http.StatusSeeOther, fmt.Sprintf("/home?langID=%d&status=%d", req.IDLang, 1))
 }
 
-type RequestUpdate struct {
-	IDProject int            `form:"id_project" json:"id_project"`
-	Status    int            `form:"status" json:"status"`
-	FileCodes map[int]string `form:"file_codes" json:"file_codes"`
+type RequestDelete struct {
+	IDProject uint            `form:"id_project" json:"id_project"`
+	FileCodes map[uint]string `form:"file_codes" json:"file_codes"`
 }
 
-func (app *App) handleUpdateProject(c *gin.Context) {
-	var req RequestUpdate
+func (app *App) handleDeleteProject(c *gin.Context) {
+	var req RequestDelete
 	if err := c.ShouldBind(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid data format"), err)
 		return
 	}
-	log.Printf("[info] UpdateProject called: IDProject=%d, Status=%d, FileCodes=%v", req.IDProject, req.Status, req.FileCodes)
+	log.Printf("[info] DeleteProject called: IDProject=%d, FileCodes=%v", req.IDProject, req.FileCodes)
 
-	if err := app.UpdateProjectStatus(req.IDProject, req.Status); err != nil {
+	if err := app.UpdateProjectStatus(req.IDProject, 1); err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] failed to update project status"), err)
 		return
 	}

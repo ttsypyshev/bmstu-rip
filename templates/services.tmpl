@@ -35,12 +35,19 @@
             <img class="search-icon" src="/static/img/icon-find.png" />
           </form>
         </div>
-        <div class="file-count-section">
-          <a href="/project/{{ $.ProjectID }}" class="file-count">
-            <img class="file-count-icon" src="/static/img/icon-count-files.png" />
-            <div class="file-count-text">{{ .Count }}</div>
-          </a>
-        </div>
+          <div class="file-count-section">
+            {{ if gt $.ProjectID 0 }}
+              <a href="/project/{{ $.ProjectID }}" class="file-count">
+                <img class="file-count-icon" src="/static/img/icon-count-files.png" />
+                <div class="file-count-text">{{ .Count }}</div>
+              </a>
+            {{ else }}
+              <div class="file-count">
+                <img class="file-count-icon" src="/static/img/icon-count-files.png" />
+                <div class="file-count-text">{{ .Count }}</div>
+              </div>
+            {{ end }}
+          </div>
         <img class="separator-line" src="/static/img/line.png" />
       </div>
       <ul class="service-list two-columns">

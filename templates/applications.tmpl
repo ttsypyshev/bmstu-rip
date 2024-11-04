@@ -48,16 +48,16 @@
         <div class="info-box">
             <h2>Проект №{{ .Project.ID }}</h2>
             <p>Дата создания: {{ .Project.CreationTime }}</p>
+            <!--
             <form action="/upd-project" method="POST" class="project-form save-project">
                 <input type="hidden" name="id_project" value="{{ .Project.ID }}" />
-                <input type="hidden" name="status" value="2" />
                 <button type="submit" class="project-btn save-project-btn">
                     <span class="save-project-text">Сохранить проект</span>
                 </button>
             </form>
-            <form action="/upd-project" method="POST" class="project-form delete-project">
+            -->
+            <form action="/del-project" method="POST" class="project-form delete-project">
                 <input type="hidden" name="id_project" value="{{ .Project.ID }}" />
-                <input type="hidden" name="status" value="1" />
                 <button type="submit" class="project-btn delete-project-btn">
                     <span class="delete-project-text">Удалить проект</span>
                 </button>
@@ -66,7 +66,7 @@
         <ul>
           {{ range .Files }}
           <li data-file-id="{{ .ID }}">
-            {{ $fileLangID := .IDLang }}
+            {{ $fileLangID := .LangID }}
             {{ $fileCode := .Code }}
             {{ range $.Langs }}
               {{ if eq .ID $fileLangID }}

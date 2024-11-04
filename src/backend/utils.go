@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // Парсинг списка в карту
@@ -64,7 +65,7 @@ func handleError(c *gin.Context, statusCode int, err error, additionalErrs ...er
 	log.Printf("Error: %s", errorMessages.String())
 }
 
-func parseQueryParam(c *gin.Context, key string) (int, error) {
+func ParseQueryParam(c *gin.Context, key string) (int, error) {
 	param := c.Query(key)
 	if param == "" {
 		return 0, nil
@@ -72,9 +73,11 @@ func parseQueryParam(c *gin.Context, key string) (int, error) {
 	return strconv.Atoi(param)
 }
 
-func (app *App) getFilteredLangs(query string) ([]DbLang, error) {
+func (app *App) GetFilteredLangs(query string) ([]DbLang, error) {
 	if query != "" {
 		return app.FilterLangsByQuery(query)
 	}
-	return app.GetLangs()
+	return app.GetLangs(func(db *gorm.DB) *gorm.DB {
+		return db.Where("status = ?", true)
+	})
 }

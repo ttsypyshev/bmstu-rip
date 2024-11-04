@@ -8,7 +8,7 @@ import (
 
 type App struct {
 	db *Db
-	userID int
+	userID uint
 }
 
 func Run() error {

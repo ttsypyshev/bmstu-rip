@@ -2,35 +2,46 @@ package database
 
 import "time"
 
+// User представляет пользователя в системе
+type User struct {
+	ID       uint   `gorm:"primaryKey;autoIncrement"`
+	Name     string `gorm:"size:255"`
+	Login    string `gorm:"size:255;unique;not null"`
+	Password string `gorm:"size:255;not null"`
+	IsAdmin  bool   `gorm:"default:false"`
+}
+
+// Lang представляет услугу
 type Lang struct {
-	ID               int    `gorm:"primaryKey"`
-	Name             string `gorm:"size:255"`
+	ID               uint   `gorm:"primaryKey;autoIncrement"`
+	Name             string `gorm:"size:255;unique;not null"`
+	ShortDescription string `gorm:"size:255;not null"`
+	Description      string `gorm:"type:text;not null"`
 	ImgLink          string `gorm:"size:255"`
-	ShortDescription string `gorm:"size:255"`
 	Author           string `gorm:"size:255"`
-	Year             string `gorm:"size:4"`
+	Year             string `gorm:"type:char(4)"`
 	Version          string `gorm:"size:50"`
-	Description      string `gorm:"type:text"`
 	List             string `gorm:"type:text"`
+	Status           bool   `gorm:"default:true;not null"`
 }
 
+// Project представляет заявку
 type Project struct {
-	ID           int `gorm:"primaryKey"`
-	IDUser       int `gorm:"column:id_user"`
-	CreationTime time.Time
-	Status       int // черновик, удалён, сформирован, завершён, отклонён
+	ID             uint      `gorm:"primaryKey;autoIncrement"`
+	UserID         uint      `gorm:"not null"`
+	CreationTime   time.Time `gorm:"default:current_timestamp"`
+	DeletionTime   *time.Time
+	CompletionTime *time.Time
+	Status         int `gorm:"not null"` // 0 - черновик, 1 - удалён, 2 - сформирован, 3 - завершён, 4 - отклонён
+	ModeratorID    *uint
+	Count          int `gorm:"default:0"`
 }
 
+// File представляет файл
 type File struct {
-	ID        int    `gorm:"primaryKey"`
-	IDLang    int    `gorm:"column:id_lang"`
-	IDProject int    `gorm:"column:id_project"`
+	ID        uint   `gorm:"primaryKey"`
+	LangID    uint   `gorm:"not null"`
+	ProjectID uint   `gorm:"not null"`
 	Code      string `gorm:"type:text"`
-}
-
-type Users struct {
-	ID       int    `gorm:"primaryKey"`
-	Login    string `gorm:"type:varchar(255)"`
-	Password string `gorm:"type:varchar(255)"`
-	IsAdmin  bool
+	AutoCheck int    `gorm:"default:0"`
 }
