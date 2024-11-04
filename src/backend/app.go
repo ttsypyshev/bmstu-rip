@@ -7,16 +7,17 @@ import (
 )
 
 type App struct {
-	db *Db
-	userID uint
+	db          *Db
+	ModeratorID uint
+	userID      uint
 }
 
 func Run() error {
 	log.Println("Server starting up")
 
 	r := gin.Default()
-	r.LoadHTMLGlob("templates/*")
-	r.Static("/static", "./static")
+	// r.LoadHTMLGlob("templates/*")
+	// r.Static("/static", "./static")
 
 	app, err := NewDB(FromEnv())
 	if err != nil {
@@ -24,7 +25,8 @@ func Run() error {
 		return err
 	}
 
-	app.userID = 1
+	app.ModeratorID = 1
+	app.userID = 2
 
 	app.SetupRoutes(r)
 	if err := r.Run(); err != nil {
