@@ -58,12 +58,12 @@ func (app *App) GetServiceByID(c *gin.Context) {
 
 type ServiceInput struct {
 	Name             string `json:"name"`
-	ShortDescription string
+	ShortDescription string `json:"short_description"`
 	Description      string `json:"description"`
-	Author           string
-	Year             string
-	Version          string
-	List             string
+	Author           string `json:"author"`
+	Year             string `json:"year"`
+	Version          string `json:"version"`
+	List             string `json:"list"`
 }
 
 func (app *App) CreateService(c *gin.Context) {
@@ -84,25 +84,26 @@ func (app *App) CreateService(c *gin.Context) {
 		List:             input.List,
 	}
 
-	if err := app.saveService(&service); err != nil {
+	langID, err := app.createLang(&service)
+	if err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to save service"), err)
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "Service created successfully",
-		"service": service,
+		"message":   "Service created successfully",
+		"serviceID": langID,
 	})
 }
 
 type ServiceUpdateInput struct {
 	Name             string `json:"name"`
-	ShortDescription string
+	ShortDescription string `json:"short_description"`
 	Description      string `json:"description"`
-	Author           string
-	Year             string
-	Version          string
-	List             string
+	Author           string `json:"author"`
+	Year             string `json:"year"`
+	Version          string `json:"version"`
+	List             string `json:"list"`
 }
 
 func (app *App) UpdateService(c *gin.Context) {
@@ -128,18 +129,16 @@ func (app *App) UpdateService(c *gin.Context) {
 		return
 	}
 
-	service = DbLang{
-		Name:             input.Name,
-		ShortDescription: input.ShortDescription,
-		Description:      input.Description,
-		Author:           input.Author,
-		Year:             input.Year,
-		Version:          input.Version,
-		List:             input.List,
-	}
+	service.Name = input.Name
+	service.ShortDescription = input.ShortDescription
+	service.Description = input.Description
+	service.Author = input.Author
+	service.Year = input.Year
+	service.Version = input.Version
+	service.List = input.List
 
 	// Сохраняем обновленную услугу в базе данных
-	if err := app.updateService(&service); err != nil {
+	if err := app.updateLang(&service); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update service"), err)
 		return
 	}
@@ -168,7 +167,8 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 	}
 
 	// Получаем файл изображения из запроса
-	file, err := c.FormFile("image")
+	// file, err := c.FormFile("image")
+	_, err = c.FormFile("image")
 	if err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] image file is required"), err)
 		return
@@ -181,8 +181,9 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 	// !minio get imagePath
 
 	// Обновляем путь к изображению в данных услуги (если оно хранится в базе данных)
-	service.ImagePath = imagePath
-	if err := app.updateService(&service); err != nil {
+	// service.ImgLink = imagePath
+	service.Status = false
+	if err := app.updateLang(&service); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update service image path"), err)
 		return
 	}
@@ -203,21 +204,14 @@ func (app *App) DeleteService(c *gin.Context) {
 		return
 	}
 
-	// Проверяем наличие услуги с указанным ID
-	service, err := app.getLangByID(uint(id))
-	if err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] service not found"), err)
+	// Удаляем запись услуги из базы данных
+	if err := app.deleteLang(uint(id)); err != nil {
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete service"), err)
 		return
 	}
 
 	// Удаляем изображение услуги
 	//! minio delete image
-
-	// Удаляем запись услуги из базы данных
-	if err := app.deleteServiceByID(uint(id)); err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete service"), err)
-		return
-	}
 
 	// Возвращаем JSON-ответ с подтверждением успешного удаления
 	c.JSON(http.StatusOK, gin.H{
@@ -227,7 +221,7 @@ func (app *App) DeleteService(c *gin.Context) {
 }
 
 type RequestAdd struct {
-	IDLang uint `form:"id_lang" json:"id_lang" binding:"required"`
+	IDLang uint `json:"id_lang"`
 }
 
 func (app *App) AddServiceToDraft(c *gin.Context) {
@@ -241,14 +235,14 @@ func (app *App) AddServiceToDraft(c *gin.Context) {
 	log.Printf("[info] AddService called: IDUser=%d, IDLang=%d", app.userID, req.IDLang)
 
 	// Создаем черновик, если он еще не существует, и получаем его ID
-	projectID, err := createDraft(app, app.userID)
+	projectID, err := app.createProject(app.userID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] error creating project"), err)
 		return
 	}
 
 	// Добавляем услугу в черновик
-	if err := app.addFile(projectID, req.IDLang, app.userID); err != nil {
+	if err := app.createFile(projectID, req.IDLang); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to add service to draft"), err)
 		return
 	}

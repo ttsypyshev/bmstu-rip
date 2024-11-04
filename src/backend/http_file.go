@@ -22,14 +22,14 @@ func (app *App) DeleteFileFromProject(c *gin.Context) {
 	log.Printf("[info] DeleteFileFromProject called: ProjectID=%d, LangID=%d", req.ProjectID, req.LangID)
 
 	// Проверяем, существует ли файл с указанным ProjectID и LangID
-	file, err := app.findProjects(req.ProjectID, req.LangID)
+	file, err := app.findFile(req.ProjectID, req.LangID)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] file not found"), err)
 		return
 	}
 
 	// Удаляем файл
-	if err := app.deleteFile(&file); err != nil {
+	if err := app.deleteFile(file.ID); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete file"), err)
 		return
 	}
@@ -58,7 +58,7 @@ func (app *App) UpdateFileInProject(c *gin.Context) {
 	log.Printf("[info] UpdateFileInProject called: ProjectID=%d, LangID=%d", req.ProjectID, req.LangID)
 
 	// Находим файл по ProjectID и LangID
-	file, err := app.findProjects(req.ProjectID, req.LangID)
+	file, err := app.findFile(req.ProjectID, req.LangID)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] file not found"), err)
 		return
@@ -73,7 +73,7 @@ func (app *App) UpdateFileInProject(c *gin.Context) {
 	}
 
 	// Обновляем запись в базе данных
-	if err := app.updateFiles(&file); err != nil {
+	if err := app.updateFile(&file); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update file"), err)
 		return
 	}

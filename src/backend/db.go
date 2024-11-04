@@ -8,9 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -117,38 +115,170 @@ func (app *App) getFileByID(fileID uint) (DbFile, error) {
 	return getByID[DbFile](app, fileID)
 }
 
-// Получение пользователя по ID
-func (app *App) getUserByID(userID uint) (*database.User, error) {
-	var user database.User
-	err := app.db.First(&user, userID).Error
+func (app *App) getUserByID(userID uint) (DbUser, error) {
+	return getByID[DbUser](app, userID)
+}
+
+func (app *App) createLang(lang *DbLang) (uint, error) {
+	if err := app.db.db.Create(lang).Error; err != nil {
+		return 0, err
+	}
+
+	return lang.ID, nil
+}
+
+func (app *App) updateLang(lang *DbLang) error {
+	if err := app.db.db.Save(lang).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (app *App) deleteLang(langID uint) error {
+	var lang DbLang
+	if err := app.db.db.First(&lang, langID).Error; err != nil {
+		return err
+	}
+
+	lang.Status = false
+	if err := app.db.db.Save(&lang).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (app *App) createProject(userID uint) (uint, error) {
+	projectID, err := findLastDraft(app, userID)
 	if err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
-
-// Получение файлов для проекта
-func (app *App) getFilesForProject(projectID uint) ([]DbFile, error) {
-	var matchedFiles []DbFile
-
-	if err := app.db.db.Where("project_id = ?", projectID).Find(&matchedFiles).Error; err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	return matchedFiles, nil
-}
+	if projectID == 0 {
+		newProject := DbProject{
+			UserID:       userID,
+			CreationTime: time.Now(),
+			Status:       0, // 0 - черновик
+		}
 
-// Подсчет количества файлов в черновике пользователя
-func (app *App) getProjectCount(projectID uint) (int64, error) {
-	var count int64
-	if err := app.db.db.Model(&DbProject{}).Select("count").Where("id = ?", projectID).Scan(&count).Error; err != nil {
-		return -1, err
+		if err := app.db.db.Create(&newProject).Error; err != nil {
+			return 0, err
+		}
+
+		return newProject.ID, nil
 	}
 
-	return count, nil
+	return projectID, nil
 }
 
-// Фильтрация языков по запросу
+func (app *App) updateProject(project *DbProject) error {
+	if project.ID == 0 {
+		return fmt.Errorf("project ID is required for update")
+	}
+
+	if err := app.db.db.Save(project).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (app *App) createFile(projectID, langID uint) error {
+	newFile := DbFile{
+		LangID:    langID,
+		ProjectID: projectID,
+	}
+
+	if _, err := app.findFile(projectID, langID); err == nil {
+		return fmt.Errorf("file with LangID %d and ProjectID %d already exists", newFile.LangID, newFile.ProjectID)
+	} else if err != gorm.ErrRecordNotFound {
+		return err
+	}
+
+	if err := app.db.db.Create(&newFile).Error; err != nil {
+		return err
+	}
+
+	if err := app.db.db.Model(&DbProject{}).Where("id = ?", projectID).Update("count", gorm.Expr("count + ?", 1)).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (app *App) updateFile(file *DbFile) error {
+	if file.ID == 0 {
+		return fmt.Errorf("file ID is required for update")
+	}
+
+	if err := app.db.db.Save(file).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (app *App) deleteFile(fileID uint) error {
+	if fileID == 0 {
+		return fmt.Errorf("file ID must be greater than 0")
+	}
+
+	if err := app.db.db.Delete(&DbFile{}, fileID).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (app *App) createUser(user *DbUser) (uint, error) {
+	// Проверка на пустой логин и пароль
+	if user.Login == "" {
+		return 0, fmt.Errorf("login is required")
+	}
+	if user.Password == "" {
+		return 0, fmt.Errorf("password is required")
+	}
+
+	var existingUser DbUser
+	if err := app.db.db.Where("login = ?", user.Login).First(&existingUser).Error; err == nil {
+		return 0, fmt.Errorf("user with login %s already exists", user.Login)
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return 0, err
+	}
+
+	if err := app.db.db.Create(user).Error; err != nil {
+		return 0, err
+	}
+
+	return user.ID, nil
+}
+
+func (app *App) updateUser(user *DbUser) error {
+	if user.ID == 0 {
+		return fmt.Errorf("user ID is required for update")
+	}
+
+	if err := app.db.db.Model(&DbUser{}).Where("id = ?", user.ID).Updates(user).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (app *App) deleteUser(userID uint) error {
+	if userID == 0 {
+		return fmt.Errorf("user ID must be greater than 0")
+	}
+
+	if err := app.db.db.Delete(&DbUser{}, userID).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Фильтрация услег по запросу
 func (app *App) filterLangsByQuery(query string) ([]DbLang, error) {
 	var filteredLangs []DbLang
 	lowerQuery := "%" + strings.ToLower(query) + "%"
@@ -159,27 +289,6 @@ func (app *App) filterLangsByQuery(query string) ([]DbLang, error) {
 	}
 
 	return filteredLangs, nil
-}
-
-// Создание нового черновика или возврат существующего
-func createDraft(app *App, userID uint) (uint, error) {
-	projectID, err := findLastDraft(app, userID)
-	if err != nil {
-		return 0, err
-	} else if projectID == 0 {
-		newProject := DbProject{
-			UserID:       userID,
-			CreationTime: time.Now(),
-			Status:       0,
-		}
-
-		if err := app.db.db.Create(&newProject).Error; err != nil {
-			return 0, err
-		}
-
-		return newProject.ID, nil
-	}
-	return projectID, nil
 }
 
 // Поиск последнего черновика для пользователя
@@ -195,43 +304,25 @@ func findLastDraft(app *App, userID uint) (uint, error) {
 	return lastProject.ID, nil
 }
 
-// Добавление файла к проекту для пользователя
-func (app *App) addFile(projectID, langID, userID uint) error {
-	newFile := DbFile{
-		LangID:    langID,
-		ProjectID: projectID,
-	}
-
+// Подсчет количества файлов в проекте
+func (app *App) getProjectCount(projectID uint) (int64, error) {
 	var count int64
-	// todo заменить на findProjects
-	if err := app.db.db.Model(&DbFile{}).Where("lang_id = ? AND project_id = ?", newFile.LangID, newFile.ProjectID).Count(&count).Error; err != nil {
-		return err
-	}
-	if count > 0 {
-		return fmt.Errorf("file with IDLang %d and IDProject %d already exists", newFile.LangID, newFile.ProjectID)
+	if err := app.db.db.Model(&DbProject{}).Select("count").Where("id = ?", projectID).Scan(&count).Error; err != nil {
+		return -1, err
 	}
 
-	if err := app.db.db.Create(&newFile).Error; err != nil {
-		return err
-	}
-
-	if err := app.db.db.Model(&DbProject{}).Where("id = ?", projectID).Update("count", gorm.Expr("count + ?", 1)).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return count, nil
 }
 
-// Обновление статуса проекта
-func (app *App) updateProjectStatus(projectID uint, newStatus uint) error {
-	query := "UPDATE projects SET status = ? WHERE id = ?"
+// Получение файлов для проекта
+func (app *App) getFilesForProject(projectID uint) ([]DbFile, error) {
+	var matchedFiles []DbFile
 
-	result := app.db.db.Exec(query, newStatus, projectID)
-	if result.Error != nil {
-		return fmt.Errorf("failed to update project status: %w", result.Error)
+	if err := app.db.db.Where("project_id = ?", projectID).Find(&matchedFiles).Error; err != nil {
+		return nil, err
 	}
 
-	return nil
+	return matchedFiles, nil
 }
 
 // Обновление кода файлов по предоставленным мапам идентификаторов и кода
@@ -255,10 +346,39 @@ func (app *App) updateFilesCode(idToCodeMap map[uint]string) error {
 	return nil
 }
 
+// Поиск конкретного файла
+func (app *App) findFile(projectID, langID uint) (DbFile, error) {
+	var file DbFile
+	if err := app.db.db.Where("project_id = ? AND lang_id = ?", projectID, langID).First(&file).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return DbFile{}, gorm.ErrRecordNotFound
+		}
+		return DbFile{}, err
+	}
+	return file, nil
+}
+
+// // Обновление статуса проекта
+// func (app *App) updateProjectStatus(projectID uint, newStatus uint) error {
+// 	query := "UPDATE projects SET status = ? WHERE id = ?"
+//
+// 	result := app.db.db.Exec(query, newStatus, projectID)
+// 	if result.Error != nil {
+// 		return fmt.Errorf("failed to update project status: %w", result.Error)
+// 	}
+//
+// 	return nil
+// }
+
+// // Функция для фильтрации проектов по дате и статусу
+// func (app *App) filterProjects(startDateStr, endDateStr string, status int) ([]Project, error) {
+// 	var projects []Project
+// 	query := app.db.Model(&Project{}).Where("status NOT IN (?)", []int{1, 0}) // исключаем удаленные (1) и черновики (0)
+
 // Функция для фильтрации проектов по дате и статусу
-func (app *App) filterProjects(startDateStr, endDateStr string, status int) ([]Project, error) {
-	var projects []Project
-	query := app.db.Model(&Project{}).Where("status NOT IN (?)", []int{1, 0}) // исключаем удаленные (1) и черновики (0)
+func (app *App) filterProjects(startDateStr, endDateStr string, status int) ([]DbProject, error) {
+	var projects []DbProject
+	query := app.db.db.Model(&DbProject{}).Where("status NOT IN (?)", []int{1, 0}) // исключаем удаленные (1) и черновики (0)
 
 	// Фильтрация по диапазону дат
 	if startDateStr != "" {
@@ -288,57 +408,61 @@ func (app *App) filterProjects(startDateStr, endDateStr string, status int) ([]P
 	return projects, nil
 }
 
-func (app *App) findProjects(projectID, langID uint) (DbFile, error) {
-	var file DbFile
-	if err := app.db.Where("project_id = ? AND lang_id = ?", req.ProjectID, req.LangID).First(&file).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return DbFile{}, gorm.ErrRecordNotFound
-		}
-		return DbFile{}, err
+// Обновление статуса проекта
+func (app *App) updateProjectStatus(projectID uint, newStatus uint) error {
+	query := "UPDATE projects SET status = ? WHERE id = ?"
+
+	result := app.db.db.Exec(query, newStatus, projectID)
+	if result.Error != nil {
+		return fmt.Errorf("failed to update project status: %w", result.Error)
 	}
-	return file, nil
+
+	return nil
 }
 
-// Проверка, занят ли логин
-func (app *App) isUserLoginTaken(login string) (bool, error) {
-	var count int64
-	err := app.db.Model(&database.User{}).Where("login = ?", login).Count(&count).Error
-	return count > 0, err
-}
+// // Фильтрация по статусу, если указан
+// 	if status != 0 {
+// 		query = query.Where("status = ?", status)
+// 	}
+//
+// Выполняем запрос к базе данных
+// 	if err := query.Find(&projects).Error; err != nil {
+// 		return nil, err
+// 	}
+//
+// 	return projects, nil
+// }
 
-// Хеширование пароля
-func hashPassword(password string) (string, error) {
-	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(hashed), err
-}
+// // Проверка, занят ли логин
+// func (app *App) isUserLoginTaken(login string) (bool, error) {
+// 	var count int64
+// 	err := app.db.Model(&database.User{}).Where("login = ?", login).Count(&count).Error
+// 	return count > 0, err
+// }
 
-// Создание пользователя в базе данных
-func (app *App) createUser(user *database.User) error {
-	return app.db.Create(user).Error
-}
+// // Хеширование пароля
+// func hashPassword(password string) (string, error) {
+// 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+// 	return string(hashed), err
+// }
 
-// Получение ID текущего пользователя (например, из токена)
-func getCurrentUserID(c *gin.Context) (uint, error) {
-	// Пример: получаем ID пользователя из токена или сессии
-	// Это зависит от того, как реализована аутентификация
-	userID, exists := c.Get("userID")
-	if !exists {
-		return 0, errors.New("user ID not found in context")
-	}
-	return userID.(uint), nil
-}
+// // Получение ID текущего пользователя (например, из токена)
+// func getCurrentUserID(c *gin.Context) (uint, error) {
+// 	// Пример: получаем ID пользователя из токена или сессии
+// 	// Это зависит от того, как реализована аутентификация
+// 	userID, exists := c.Get("userID")
+// 	if !exists {
+// 		return 0, errors.New("user ID not found in context")
+// 	}
+// 	return userID.(uint), nil
+// }
 
-// Обновление профиля пользователя
-func (app *App) updateUserProfile(userID uint, updatedFields map[string]interface{}) error {
-	return app.db.Model(&database.User{}).Where("id = ?", userID).Updates(updatedFields).Error
-}
-
-// Получение пользователя по логину
-func (app *App) getUserByLogin(login string) (*database.User, error) {
-	var user database.User
-	err := app.db.Where("login = ?", login).First(&user).Error
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
+// // Получение пользователя по логину
+// func (app *App) getUserByLogin(login string) (*database.User, error) {
+// 	var user database.User
+// 	err := app.db.Where("login = ?", login).First(&user).Error
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &user, nil
+// }

@@ -83,11 +83,11 @@ INSERT INTO langs (name, img_link, short_description, author, year, version, des
 
 
 
-INSERT INTO projects (user_id, creation_time, status, moderator_id) VALUES
-(2, NOW(), 1, 1),
-(2, NOW(), 2, 1),
-(3, NOW(), 0, 1),
-(2, NOW(), 0, NULL);
+INSERT INTO projects (user_id, creation_time, status, moderator_id, count) VALUES
+(2, NOW(), 1, 1, 2),
+(2, NOW(), 2, 1, 3),
+(3, NOW(), 0, 1, 0),
+(2, NOW(), 0, NULL, 0);
 
 
 

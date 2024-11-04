@@ -10,7 +10,7 @@ CREATE TABLE users (
 -- Услуги (Languages)
 CREATE TABLE langs (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
     short_description VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     img_link VARCHAR(255),

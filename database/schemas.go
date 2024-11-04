@@ -14,7 +14,7 @@ type User struct {
 // Lang представляет услугу
 type Lang struct {
 	ID               uint   `gorm:"primaryKey;autoIncrement"`
-	Name             string `gorm:"size:255;unique;not null"`
+	Name             string `gorm:"size:255;not null"`
 	ShortDescription string `gorm:"size:255;not null"`
 	Description      string `gorm:"type:text;not null"`
 	ImgLink          string `gorm:"size:255"`

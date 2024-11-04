@@ -26,9 +26,9 @@ func (app *App) SetupRoutes(r *gin.Engine) {
 	r.DELETE("/file/delete-file", app.DeleteFileFromProject) // Удалить файл из заявки (без первичного ключа файла).
 	r.PUT("/file/update-file", app.UpdateFileInProject)      // Изменить количество, порядок или значение файла в заявке (без первичного ключа файла).
 
-	// Пользователи (домен: `/user`)
-	r.POST("/user/register", app.RegisterUser)    // Регистрация нового пользователя.
-	r.PUT("/user/profile", app.UpdateUserProfile) // Изменить данные пользователя (личный кабинет).
-	r.POST("/user/login", app.UserLogin)          // Аутентификация пользователя.
-	r.POST("/user/logout", app.UserLogout)        // Деавторизация пользователя.
+	// // Пользователи (домен: `/user`)
+	// r.POST("/user/register", app.RegisterUser)    // Регистрация нового пользователя.
+	// r.PUT("/user/profile", app.UpdateUserProfile) // Изменить данные пользователя (личный кабинет).
+	// r.POST("/user/login", app.UserLogin)          // Аутентификация пользователя.
+	// r.POST("/user/logout", app.UserLogout)        // Деавторизация пользователя.
 }
