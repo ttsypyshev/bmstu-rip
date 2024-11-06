@@ -69,8 +69,12 @@ type CreateServiceRequest struct {
 }
 
 func (app *App) CreateService(c *gin.Context) {
-	var input CreateServiceRequest
+	if !app.isAdmin {
+		handleError(c, http.StatusBadRequest, errors.New("[err] user does not have sufficient rights"))
+		return
+	}
 
+	var input CreateServiceRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid input data: unable to parse JSON"), err)
 		return
@@ -109,6 +113,11 @@ type UpdateServiceRequest struct {
 }
 
 func (app *App) UpdateService(c *gin.Context) {
+	if !app.isAdmin {
+		handleError(c, http.StatusBadRequest, errors.New("[err] user does not have sufficient rights"))
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -162,6 +171,11 @@ func (app *App) UpdateService(c *gin.Context) {
 }
 
 func (app *App) UpdateServiceImage(c *gin.Context) {
+	if !app.isAdmin {
+		handleError(c, http.StatusBadRequest, errors.New("[err] user does not have sufficient rights"))
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -215,6 +229,11 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 }
 
 func (app *App) DeleteService(c *gin.Context) {
+	if !app.isAdmin {
+		handleError(c, http.StatusBadRequest, errors.New("[err] user does not have sufficient rights"))
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -257,6 +276,11 @@ type AddServiceRequest struct {
 }
 
 func (app *App) AddServiceToDraft(c *gin.Context) {
+	if app.isAdmin {
+		handleError(c, http.StatusBadRequest, errors.New("[err] this is not the task of this user"))
+		return
+	}
+
 	var req AddServiceRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {

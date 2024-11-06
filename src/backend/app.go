@@ -9,8 +9,8 @@ import (
 
 type App struct {
 	db          *Db
-	ModeratorID uint
 	userID      uint
+	isAdmin     bool
 	minioClient *minio.Client
 }
 
@@ -31,8 +31,8 @@ func Run() error {
 		return err
 	}
 
-	app.ModeratorID = 1
-	app.userID = 2
+	app.userID = 0
+	app.isAdmin = false
 
 	app.SetupRoutes(r)
 	if err := r.Run(); err != nil {

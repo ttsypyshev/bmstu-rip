@@ -57,6 +57,11 @@ type UpdateProjectRequest struct {
 }
 
 func (app *App) UpdateProject(c *gin.Context) {
+	if app.isAdmin {
+		handleError(c, http.StatusBadRequest, errors.New("[err] this is not the task of this user"))
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -73,6 +78,11 @@ func (app *App) UpdateProject(c *gin.Context) {
 	project, err := app.getProjectByID(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
+		return
+	}
+
+	if app.userID != project.UserID {
+		handleError(c, http.StatusNotFound, errors.New("[err] project does not belong to the user"), err)
 		return
 	}
 
@@ -104,6 +114,11 @@ type AddProjectRequest struct {
 }
 
 func (app *App) SubmitProject(c *gin.Context) {
+	if app.isAdmin {
+		handleError(c, http.StatusBadRequest, errors.New("[err] this is not the task of this user"))
+		return
+	}
+
 	var req AddProjectRequest
 	if err := c.ShouldBind(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid data format"), err)
@@ -113,6 +128,11 @@ func (app *App) SubmitProject(c *gin.Context) {
 	project, err := app.getProjectByID(req.IDProject)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
+		return
+	}
+
+	if app.userID != project.UserID {
+		handleError(c, http.StatusNotFound, errors.New("[err] project does not belong to the user"), err)
 		return
 	}
 
@@ -140,6 +160,11 @@ type DeleteProjectRequest struct {
 }
 
 func (app *App) DeleteProject(c *gin.Context) {
+	if app.isAdmin {
+		handleError(c, http.StatusBadRequest, errors.New("[err] this is not the task of this user"))
+		return
+	}
+
 	var req DeleteProjectRequest
 	if err := c.ShouldBind(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid data format"), err)
@@ -149,6 +174,11 @@ func (app *App) DeleteProject(c *gin.Context) {
 	project, err := app.getProjectByID(req.IDProject)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
+		return
+	}
+
+	if app.userID != project.UserID {
+		handleError(c, http.StatusNotFound, errors.New("[err] project does not belong to the user"), err)
 		return
 	}
 
@@ -184,6 +214,11 @@ type CompleteProjectRequest struct {
 }
 
 func (app *App) CompleteProject(c *gin.Context) {
+	if !app.isAdmin {
+		handleError(c, http.StatusBadRequest, errors.New("[err] user does not have sufficient rights"))
+		return
+	}
+
 	var req CompleteProjectRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid request format"), err)

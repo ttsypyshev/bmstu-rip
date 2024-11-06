@@ -249,23 +249,33 @@ func (app *App) deleteFile(projectID, fileID uint) error {
 	return nil
 }
 
-func (app *App) createUser(user *DbUser) (uint, error) {
-	// Проверка на пустой логин и пароль
-	if user.Login == "" {
+func (app *App) createUser(login, password, name string, is_admin bool) (uint, error) {
+	var user DbUser
+
+	if login == "" {
 		return 0, fmt.Errorf("login is required")
 	}
-	if user.Password == "" {
+	user.Login = login
+
+	if password == "" {
 		return 0, fmt.Errorf("password is required")
 	}
+	user.Password = password
+
+	if name != "" {
+		user.Name = name
+	}
+
+	user.IsAdmin = is_admin
 
 	var existingUser DbUser
-	if err := app.db.db.Where("login = ?", user.Login).First(&existingUser).Error; err == nil {
-		return 0, fmt.Errorf("user with login %s already exists", user.Login)
+	if err := app.db.db.Where("login = ?", login).First(&existingUser).Error; err == nil {
+		return 0, fmt.Errorf("user with login %s already exists", login)
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, err
 	}
 
-	if err := app.db.db.Create(user).Error; err != nil {
+	if err := app.db.db.Create(&user).Error; err != nil {
 		return 0, err
 	}
 
@@ -277,7 +287,11 @@ func (app *App) updateUser(user *DbUser) error {
 		return fmt.Errorf("user ID is required for update")
 	}
 
-	if err := app.db.db.Model(&DbUser{}).Where("id = ?", user.ID).Updates(user).Error; err != nil {
+	if err := app.db.db.Model(&DbUser{}).Where("id = ?", user.ID).Updates(map[string]interface{}{
+		"name":     user.Name,
+		"login":    user.Login,
+		"is_admin": user.IsAdmin,
+	}).Error; err != nil {
 		return err
 	}
 
@@ -320,6 +334,42 @@ func findLastDraft(app *App, userID uint) (uint, error) {
 		return 0, err
 	}
 	return lastProject.ID, nil
+}
+
+// Функция для фильтрации проектов по дате и статусу
+func (app *App) filterProjects(startDate, endDate, statusStr string) ([]DbProject, error) {
+	var projects []DbProject
+	query := app.db.db.Model(&DbProject{}).Preload("User").Preload("Moderator").Where("status NOT IN (?)", []int{1, 0})
+
+	if startDate != "" {
+		start, err := time.Parse("2006-01-02", startDate)
+		if err != nil {
+			return nil, err
+		}
+		query = query.Where("creation_time >= ?", start)
+	}
+
+	if endDate != "" {
+		end, err := time.Parse("2006-01-02", endDate)
+		if err != nil {
+			return nil, err
+		}
+		query = query.Where("creation_time <= ?", end)
+	}
+
+	if statusStr != "" {
+		status, err := strconv.Atoi(statusStr)
+		if err != nil {
+			return nil, err
+		}
+		query = query.Where("status = ?", status)
+	}
+
+	if err := query.Find(&projects).Error; err != nil {
+		return nil, err
+	}
+
+	return projects, nil
 }
 
 // Подсчет количества файлов в проекте
@@ -376,59 +426,6 @@ func (app *App) findFile(projectID, langID uint) (DbFile, error) {
 	return file, nil
 }
 
-// // Обновление статуса проекта
-// func (app *App) updateProjectStatus(projectID uint, newStatus uint) error {
-// 	query := "UPDATE projects SET status = ? WHERE id = ?"
-//
-// 	result := app.db.db.Exec(query, newStatus, projectID)
-// 	if result.Error != nil {
-// 		return fmt.Errorf("failed to update project status: %w", result.Error)
-// 	}
-//
-// 	return nil
-// }
-
-// // Функция для фильтрации проектов по дате и статусу
-// func (app *App) filterProjects(startDateStr, endDateStr string, status int) ([]Project, error) {
-// 	var projects []Project
-// 	query := app.db.Model(&Project{}).Where("status NOT IN (?)", []int{1, 0}) // исключаем удаленные (1) и черновики (0)
-
-// Функция для фильтрации проектов по дате и статусу
-func (app *App) filterProjects(startDate, endDate, statusStr string) ([]DbProject, error) {
-	var projects []DbProject
-	query := app.db.db.Model(&DbProject{}).Preload("User").Preload("Moderator").Where("status NOT IN (?)", []int{1, 0})
-
-	if startDate != "" {
-		start, err := time.Parse("2006-01-02", startDate)
-		if err != nil {
-			return nil, err
-		}
-		query = query.Where("creation_time >= ?", start)
-	}
-
-	if endDate != "" {
-		end, err := time.Parse("2006-01-02", endDate)
-		if err != nil {
-			return nil, err
-		}
-		query = query.Where("creation_time <= ?", end)
-	}
-
-	if statusStr != "" {
-		status, err := strconv.Atoi(statusStr)
-		if err != nil {
-			return nil, err
-		}
-		query = query.Where("status = ?", status)
-	}
-
-	if err := query.Find(&projects).Error; err != nil {
-		return nil, err
-	}
-
-	return projects, nil
-}
-
 // Обновление статуса проекта
 func (app *App) updateProjectStatus(projectID uint, newStatus uint) error {
 	query := "UPDATE projects SET status = ? WHERE id = ?"
@@ -441,25 +438,28 @@ func (app *App) updateProjectStatus(projectID uint, newStatus uint) error {
 	return nil
 }
 
-// // Фильтрация по статусу, если указан
-// 	if status != 0 {
-// 		query = query.Where("status = ?", status)
-// 	}
-//
-// Выполняем запрос к базе данных
-// 	if err := query.Find(&projects).Error; err != nil {
-// 		return nil, err
-// 	}
-//
-// 	return projects, nil
-// }
+// Поиск юзера по логину
+func (app *App) findUserByLogin(login string) (DbUser, error) {
+	var user DbUser
+	if err := app.db.db.Where("login = ?", login).First(&user).Error; err != nil {
+		return DbUser{}, err
+	}
+	return user, nil
+}
 
-// // Проверка, занят ли логин
-// func (app *App) isUserLoginTaken(login string) (bool, error) {
-// 	var count int64
-// 	err := app.db.Model(&database.User{}).Where("login = ?", login).Count(&count).Error
-// 	return count > 0, err
-// }
+// Сравнение переданного пароля с паролем пользователя
+func (app *App) matchPassword(login, password string) (bool, DbUser, error) {
+	var user DbUser
+	if err := app.db.db.Where("login = ?", login).First(&user).Error; err != nil {
+		return false, DbUser{}, err
+	}
+
+	if user.Password == password {
+		return true, user, nil
+	}
+
+	return false, DbUser{}, nil
+}
 
 // // Хеширование пароля
 // func hashPassword(password string) (string, error) {
@@ -476,14 +476,4 @@ func (app *App) updateProjectStatus(projectID uint, newStatus uint) error {
 // 		return 0, errors.New("user ID not found in context")
 // 	}
 // 	return userID.(uint), nil
-// }
-
-// // Получение пользователя по логину
-// func (app *App) getUserByLogin(login string) (*database.User, error) {
-// 	var user database.User
-// 	err := app.db.Where("login = ?", login).First(&user).Error
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &user, nil
 // }

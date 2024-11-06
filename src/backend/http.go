@@ -10,7 +10,7 @@ func (app *App) SetupRoutes(r *gin.Engine) {
 	r.GET("/info/:id", app.GetServiceByID)             // Получить данные конкретной услуги по ее ID.
 	r.POST("/info", app.CreateService)                 // Добавить новую услугу (без изображения).
 	r.PUT("/info/:id", app.UpdateService)              // Изменить данные услуги по ее ID.
-	r.POST("/info/:id", app.UpdateServiceImage)    // Добавить или заменить изображение для услуги с указанным ID. Если изображение уже существует, оно заменяется.
+	r.POST("/info/:id", app.UpdateServiceImage)        // Добавить или заменить изображение для услуги с указанным ID. Если изображение уже существует, оно заменяется.
 	r.DELETE("/info/:id", app.DeleteService)           // Удалить услугу вместе с изображением.
 	r.POST("/info/add-service", app.AddServiceToDraft) // Добавить услугу в заявку-черновик. Если черновик отсутствует, создается новый с указанными значениями.
 
@@ -27,8 +27,8 @@ func (app *App) SetupRoutes(r *gin.Engine) {
 	r.PUT("/file/update-file", app.UpdateFileInProject)      // Изменить количество, порядок или значение файла в заявке (без первичного ключа файла).
 
 	// Пользователи (домен: `/user`)
-	// r.POST("/user/register", app.RegisterUser)    // Регистрация нового пользователя.
-	// r.PUT("/user/profile", app.UpdateUserProfile) // Изменить данные пользователя (личный кабинет).
-	// r.POST("/user/login", app.UserLogin)          // Аутентификация пользователя.
-	// r.POST("/user/logout", app.UserLogout)        // Деавторизация пользователя.
+	r.POST("/user/register", app.RegisterUser)    // Регистрация нового пользователя.
+	r.PUT("/user/profile", app.UpdateUserProfile) // Изменить данные пользователя (личный кабинет).
+	r.POST("/user/login", app.UserLogin)          // Аутентификация пользователя.
+	r.POST("/user/logout", app.UserLogout)        // Деавторизация пользователя.
 }
