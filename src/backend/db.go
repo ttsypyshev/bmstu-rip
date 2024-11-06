@@ -26,7 +26,7 @@ type Db struct {
 
 func Migrate() error {
 	_ = godotenv.Load()
-	db, err := gorm.Open(postgres.Open(FromEnv()), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(FromEnvDB()), &gorm.Config{})
 	if err != nil {
 		return err
 	}

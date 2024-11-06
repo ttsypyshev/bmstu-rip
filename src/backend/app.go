@@ -4,24 +4,30 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/minio/minio-go/v7"
 )
 
 type App struct {
 	db          *Db
 	ModeratorID uint
 	userID      uint
+	minioClient *minio.Client
 }
 
 func Run() error {
 	log.Println("Server starting up")
 
 	r := gin.Default()
-	// r.LoadHTMLGlob("templates/*")
-	// r.Static("/static", "./static")
 
-	app, err := NewDB(FromEnv())
+	app, err := NewDB(FromEnvDB())
 	if err != nil {
 		log.Fatalf("Error initializing the database: %v", err)
+		return err
+	}
+
+	app.minioClient, err = InitializeMinIO()
+	if err != nil {
+		log.Fatalf("Error initializing MinIO: %v", err)
 		return err
 	}
 

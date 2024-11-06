@@ -10,7 +10,7 @@ func (app *App) SetupRoutes(r *gin.Engine) {
 	r.GET("/info/:id", app.GetServiceByID)             // Получить данные конкретной услуги по ее ID.
 	r.POST("/info", app.CreateService)                 // Добавить новую услугу (без изображения).
 	r.PUT("/info/:id", app.UpdateService)              // Изменить данные услуги по ее ID.
-	r.POST("/info/:id/img", app.UpdateServiceImage)    // Добавить или заменить изображение для услуги с указанным ID. Если изображение уже существует, оно заменяется.
+	r.POST("/info/:id", app.UpdateServiceImage)    // Добавить или заменить изображение для услуги с указанным ID. Если изображение уже существует, оно заменяется.
 	r.DELETE("/info/:id", app.DeleteService)           // Удалить услугу вместе с изображением.
 	r.POST("/info/add-service", app.AddServiceToDraft) // Добавить услугу в заявку-черновик. Если черновик отсутствует, создается новый с указанными значениями.
 

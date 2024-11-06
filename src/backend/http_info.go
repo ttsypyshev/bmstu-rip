@@ -1,11 +1,14 @@
 package backend
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/minio/minio-go/v7"
 )
 
 func (app *App) GetServiceList(c *gin.Context) {
@@ -172,21 +175,34 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 		return
 	}
 
-	// file, err := c.FormFile("image")
-	_, err = c.FormFile("image")
+	file, err := c.FormFile("image")
 	if err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] image file is required"), err)
 		return
 	}
 
-	// Сохраняем изображение
-	//! minio add image
+	src, err := file.Open()
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to open image file"), err)
+		return
+	}
+	defer src.Close()
 
-	// Получаем ссылку
-	// !minio get imagePath
+	// Загрузка изображения в MinIO
+	_, err = app.minioClient.PutObject(context.Background(), "code-inspector", file.Filename, src, file.Size, minio.PutObjectOptions{
+		ContentType: file.Header.Get("Content-Type"),
+	})
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to upload image to MinIO"), err)
+		return
+	}
 
-	// service.ImgLink = imagePath
+	// Генерация публичной ссылки на изображение (если MinIO настроен на публичный доступ)
+	imageURL := fmt.Sprintf("%s/%s/%s", app.minioClient.EndpointURL(), "code-inspector", file.Filename)
+
+	service.ImgLink = imageURL
 	service.Status = false
+
 	if err := app.updateLang(&service); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update service image path"), err)
 		return
@@ -206,13 +222,29 @@ func (app *App) DeleteService(c *gin.Context) {
 		return
 	}
 
+	service, err := app.getLangByID(uint(id))
+	if err != nil {
+		handleError(c, http.StatusNotFound, errors.New("[err] service not found"), err)
+		return
+	}
+
+	// Удаляем изображение из MinIO, если оно существует
+	if service.ImgLink != "" {
+		// Генерация имени объекта для удаления из MinIO
+		objectName := extractObjectNameFromURL(service.ImgLink)
+
+		// Удаляем изображение из MinIO
+		err = app.minioClient.RemoveObject(context.Background(), "code-inspector", objectName, minio.RemoveObjectOptions{})
+		if err != nil {
+			handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete image from MinIO"), err)
+			return
+		}
+	}
+
 	if err := app.deleteLang(uint(id)); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete service"), err)
 		return
 	}
-
-	// Удаляем изображение услуги
-	//! minio delete image
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":   "Service deleted successfully",

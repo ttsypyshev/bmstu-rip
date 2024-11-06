@@ -31,7 +31,7 @@ func ParseList(listStr string) map[string]string {
 }
 
 // FromEnv собирает DSN строку из переменных окружения
-func FromEnv() string {
+func FromEnvDB() string {
 	host := os.Getenv("DB_HOST")
 	if host == "" {
 		return ""
@@ -43,6 +43,35 @@ func FromEnv() string {
 	dbname := os.Getenv("DB_NAME")
 
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
+}
+
+// FromEnvMinIO собирает настройки подключения для MinIO из переменных окружения
+func FromEnvMinIO() (string, string, string, bool, error) {
+	endpoint := os.Getenv("MINIO_ENDPOINT")
+	accessKey := os.Getenv("MINIO_ACCESS_KEY")
+	secretKey := os.Getenv("MINIO_SECRET_KEY")
+	useSSLStr := os.Getenv("MINIO_USE_SSL")
+
+	if endpoint == "" || accessKey == "" || secretKey == "" {
+		return "", "", "", false, fmt.Errorf("not all required environment variables are set")
+	}
+
+	useSSL := false
+	if useSSLStr != "" {
+		var err error
+		useSSL, err = strconv.ParseBool(useSSLStr)
+		if err != nil {
+			return "", "", "", false, fmt.Errorf("could not convert MINIO_USE_SSL to bool: %v", err)
+		}
+	}
+
+	return endpoint, accessKey, secretKey, useSSL, nil
+}
+
+func extractObjectNameFromURL(url string) string {
+	// Извлекаем имя объекта из URL (например, "service_images/filename.jpg")
+	parts := strings.Split(url, "/")
+	return parts[len(parts)-1]
 }
 
 // handleError обрабатывает и логирует ошибки, отправляет ответ
