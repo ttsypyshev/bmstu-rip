@@ -2,15 +2,14 @@ package backend
 
 import (
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type DeleteFileRequest struct {
-	ProjectID uint `json:"project_id" binding:"required"` // ID проекта
-	LangID    uint `json:"lang_id" binding:"required"`    // ID услуги
+	ProjectID uint `json:"project_id" binding:"required"`
+	LangID    uint `json:"lang_id" binding:"required"`
 }
 
 func (app *App) DeleteFileFromProject(c *gin.Context) {
@@ -19,34 +18,28 @@ func (app *App) DeleteFileFromProject(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid request format"), err)
 		return
 	}
-	log.Printf("[info] DeleteFileFromProject called: ProjectID=%d, LangID=%d", req.ProjectID, req.LangID)
 
-	// Проверяем, существует ли файл с указанным ProjectID и LangID
 	file, err := app.findFile(req.ProjectID, req.LangID)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] file not found"), err)
 		return
 	}
 
-	// Удаляем файл
-	if err := app.deleteFile(file.ID); err != nil {
+	if err := app.deleteFile(req.ProjectID, file.ID); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete file"), err)
 		return
 	}
 
-	log.Printf("[info] File successfully deleted from project: ProjectID=%d, LangID=%d", req.ProjectID, req.LangID)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "File successfully deleted from project",
 	})
 }
 
 type UpdateFileRequest struct {
-	ProjectID uint   `json:"project_id" binding:"required"` // ID проекта
-	LangID    uint   `json:"lang_id" binding:"required"`    // ID услуги
-	Code      string `json:"code"`                          // Новое значение кода файла
-	AutoCheck *int   `json:"auto_check"`                    // Новый статус автопроверки
-	Order     *int   `json:"order"`                         // Новый порядок файла, если применимо
-	Count     *int   `json:"count"`                         // Новое количество, если применимо
+	ProjectID uint   `json:"project_id" binding:"required"`
+	LangID    uint   `json:"lang_id" binding:"required"`
+	Code      string `json:"code"`
+	AutoCheck *int   `json:"auto_check"`
 }
 
 func (app *App) UpdateFileInProject(c *gin.Context) {
@@ -55,30 +48,38 @@ func (app *App) UpdateFileInProject(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid request format"), err)
 		return
 	}
-	log.Printf("[info] UpdateFileInProject called: ProjectID=%d, LangID=%d", req.ProjectID, req.LangID)
 
-	// Находим файл по ProjectID и LangID
 	file, err := app.findFile(req.ProjectID, req.LangID)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] file not found"), err)
 		return
 	}
 
-	// Обновляем указанные поля файла
-	file = DbFile{
-		ProjectID: req.ProjectID,
-		LangID:    req.LangID,
-		Code:      req.Code,
-		AutoCheck: *req.AutoCheck,
+	if req.ProjectID == 0 {
+		handleError(c, http.StatusBadRequest, errors.New("[err] project ID is required"))
+		return
+	} else {
+		file.ProjectID = req.ProjectID
 	}
 
-	// Обновляем запись в базе данных
+	if req.LangID == 0 {
+		handleError(c, http.StatusBadRequest, errors.New("[err] language ID is required"))
+		return
+	} else {
+		file.LangID = req.LangID
+	}
+
+	file.Code = req.Code
+
+	if req.AutoCheck != nil {
+		file.AutoCheck = *req.AutoCheck
+	}
+
 	if err := app.updateFile(&file); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update file"), err)
 		return
 	}
 
-	log.Printf("[info] File successfully updated in project: ProjectID=%d, LangID=%d", req.ProjectID, req.LangID)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "File successfully updated in project",
 	})

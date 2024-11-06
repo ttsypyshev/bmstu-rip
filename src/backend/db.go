@@ -3,8 +3,8 @@ package backend
 import (
 	"errors"
 	"fmt"
-	"log"
 	"rip/database"
+	"strconv"
 	"strings"
 	"time"
 
@@ -177,6 +177,20 @@ func (app *App) updateProject(project *DbProject) error {
 		return fmt.Errorf("project ID is required for update")
 	}
 
+	if project.Status == 1 || project.Status == 2 {
+		now := time.Now()
+		project.FormationTime = &now
+	} else {
+		project.FormationTime = nil
+	}
+
+	if project.Status == 3 || project.Status == 4 {
+		now := time.Now()
+		project.CompletionTime = &now
+	} else {
+		project.CompletionTime = nil
+	}
+
 	if err := app.db.db.Save(project).Error; err != nil {
 		return err
 	}
@@ -219,12 +233,16 @@ func (app *App) updateFile(file *DbFile) error {
 	return nil
 }
 
-func (app *App) deleteFile(fileID uint) error {
+func (app *App) deleteFile(projectID, fileID uint) error {
 	if fileID == 0 {
 		return fmt.Errorf("file ID must be greater than 0")
 	}
 
 	if err := app.db.db.Delete(&DbFile{}, fileID).Error; err != nil {
+		return err
+	}
+
+	if err := app.db.db.Model(&DbProject{}).Where("id = ?", projectID).Update("count", gorm.Expr("count - ?", 1)).Error; err != nil {
 		return err
 	}
 
@@ -318,7 +336,7 @@ func (app *App) getProjectCount(projectID uint) (int64, error) {
 func (app *App) getFilesForProject(projectID uint) ([]DbFile, error) {
 	var matchedFiles []DbFile
 
-	if err := app.db.db.Where("project_id = ?", projectID).Find(&matchedFiles).Error; err != nil {
+	if err := app.db.db.Where("project_id = ?", projectID).Preload("Lang").Find(&matchedFiles).Error; err != nil {
 		return nil, err
 	}
 
@@ -326,14 +344,14 @@ func (app *App) getFilesForProject(projectID uint) ([]DbFile, error) {
 }
 
 // Обновление кода файлов по предоставленным мапам идентификаторов и кода
-func (app *App) updateFilesCode(idToCodeMap map[uint]string) error {
+func (app *App) updateFilesCode(projectID uint, idToCodeMap map[uint]string) error {
+	if len(idToCodeMap) == 0 {
+		return fmt.Errorf("the map of IDs to codes is empty")
+	}
+
 	for id, newCode := range idToCodeMap {
 		var file DbFile
-		if err := app.db.db.Where("id = ?", id).First(&file).Error; err != nil {
-			if err == gorm.ErrRecordNotFound {
-				log.Printf("file with id %d not found, skipping...", id)
-				continue
-			}
+		if err := app.db.db.Where("id = ? AND project_id = ?", id, projectID).First(&file).Error; err != nil {
 			return err
 		}
 
@@ -376,31 +394,34 @@ func (app *App) findFile(projectID, langID uint) (DbFile, error) {
 // 	query := app.db.Model(&Project{}).Where("status NOT IN (?)", []int{1, 0}) // исключаем удаленные (1) и черновики (0)
 
 // Функция для фильтрации проектов по дате и статусу
-func (app *App) filterProjects(startDateStr, endDateStr string, status int) ([]DbProject, error) {
+func (app *App) filterProjects(startDate, endDate, statusStr string) ([]DbProject, error) {
 	var projects []DbProject
-	query := app.db.db.Model(&DbProject{}).Where("status NOT IN (?)", []int{1, 0}) // исключаем удаленные (1) и черновики (0)
+	query := app.db.db.Model(&DbProject{}).Preload("User").Preload("Moderator").Where("status NOT IN (?)", []int{1, 0})
 
-	// Фильтрация по диапазону дат
-	if startDateStr != "" {
-		startDate, err := time.Parse("2006-01-02", startDateStr)
-		if err == nil {
-			query = query.Where("creation_time >= ?", startDate)
+	if startDate != "" {
+		start, err := time.Parse("2006-01-02", startDate)
+		if err != nil {
+			return nil, err
 		}
+		query = query.Where("creation_time >= ?", start)
 	}
 
-	if endDateStr != "" {
-		endDate, err := time.Parse("2006-01-02", endDateStr)
-		if err == nil {
-			query = query.Where("creation_time <= ?", endDate)
+	if endDate != "" {
+		end, err := time.Parse("2006-01-02", endDate)
+		if err != nil {
+			return nil, err
 		}
+		query = query.Where("creation_time <= ?", end)
 	}
 
-	// Фильтрация по статусу, если указан
-	if status != 0 {
+	if statusStr != "" {
+		status, err := strconv.Atoi(statusStr)
+		if err != nil {
+			return nil, err
+		}
 		query = query.Where("status = ?", status)
 	}
 
-	// Выполняем запрос к базе данных
 	if err := query.Find(&projects).Error; err != nil {
 		return nil, err
 	}

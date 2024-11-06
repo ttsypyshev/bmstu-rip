@@ -2,7 +2,6 @@ package backend
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -13,19 +12,19 @@ func (app *App) GetServiceList(c *gin.Context) {
 	query := c.Query("langname")
 	filteredLangs, err := app.GetFilteredLangs(query)
 	if err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] failed to retrieve language information"), err)
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to retrieve filtered languages"), err)
 		return
 	}
 
 	projectID, err := findLastDraft(app, app.userID)
 	if err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] project was not created 1"), err)
+		handleError(c, http.StatusInternalServerError, errors.New("[err] unable to find the last draft project for the user"), err)
 		return
 	}
 
 	count, err := app.getProjectCount(projectID)
 	if err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] project was not created 2"), err)
+		handleError(c, http.StatusInternalServerError, errors.New("[err] unable to retrieve project count for the draft"), err)
 		return
 	}
 
@@ -40,23 +39,23 @@ func (app *App) GetServiceByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		handleError(c, http.StatusBadRequest, errors.New("[err] invalid language ID"), err)
+		handleError(c, http.StatusBadRequest, errors.New("[err] invalid language ID format"), err)
 		return
 	}
 
 	lang, err := app.getLangByID(uint(id))
 	if err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] language information not available"), err)
+		handleError(c, http.StatusNotFound, errors.New("[err] language not found for the given ID"), err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"info": lang,
-		// "list":  ParseList(lang.List),
+		// "list":  ParseList(lang.List), // Uncomment if needed later
 	})
 }
 
-type ServiceInput struct {
+type CreateServiceRequest struct {
 	Name             string `json:"name"`
 	ShortDescription string `json:"short_description"`
 	Description      string `json:"description"`
@@ -67,10 +66,10 @@ type ServiceInput struct {
 }
 
 func (app *App) CreateService(c *gin.Context) {
-	var input ServiceInput
+	var input CreateServiceRequest
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		handleError(c, http.StatusBadRequest, errors.New("[err] invalid input data"), err)
+		handleError(c, http.StatusBadRequest, errors.New("[err] invalid input data: unable to parse JSON"), err)
 		return
 	}
 
@@ -86,17 +85,17 @@ func (app *App) CreateService(c *gin.Context) {
 
 	langID, err := app.createLang(&service)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to save service"), err)
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to save service in the database"), err)
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message":   "Service created successfully",
+		"message":   "Service successfully created.",
 		"serviceID": langID,
 	})
 }
 
-type ServiceUpdateInput struct {
+type UpdateServiceRequest struct {
 	Name             string `json:"name"`
 	ShortDescription string `json:"short_description"`
 	Description      string `json:"description"`
@@ -107,43 +106,52 @@ type ServiceUpdateInput struct {
 }
 
 func (app *App) UpdateService(c *gin.Context) {
-	// Получаем ID услуги из параметров запроса
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		handleError(c, http.StatusBadRequest, errors.New("[err] invalid service ID"), err)
+		handleError(c, http.StatusBadRequest, errors.New("[err] invalid service ID format"), err)
 		return
 	}
 
-	// Парсим данные для обновления из JSON-запроса
-	var input ServiceUpdateInput
+	var input UpdateServiceRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid input data"), err)
 		return
 	}
 
-	// Получаем текущую запись услуги по ID
 	service, err := app.getLangByID(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] service not found"), err)
 		return
 	}
 
-	service.Name = input.Name
-	service.ShortDescription = input.ShortDescription
-	service.Description = input.Description
-	service.Author = input.Author
-	service.Year = input.Year
-	service.Version = input.Version
-	service.List = input.List
+	if input.Name != "" {
+		service.Name = input.Name
+	}
+	if input.ShortDescription != "" {
+		service.ShortDescription = input.ShortDescription
+	}
+	if input.Description != "" {
+		service.Description = input.Description
+	}
+	if input.Author != "" {
+		service.Author = input.Author
+	}
+	if input.Year != "" {
+		service.Year = input.Year
+	}
+	if input.Version != "" {
+		service.Version = input.Version
+	}
+	if input.List != "" {
+		service.List = input.List
+	}
 
-	// Сохраняем обновленную услугу в базе данных
 	if err := app.updateLang(&service); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update service"), err)
 		return
 	}
 
-	// Возвращаем JSON-ответ с обновленными данными услуги
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Service updated successfully",
 		"service": service,
@@ -151,7 +159,6 @@ func (app *App) UpdateService(c *gin.Context) {
 }
 
 func (app *App) UpdateServiceImage(c *gin.Context) {
-	// Извлекаем ID услуги из параметров запроса
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -159,14 +166,12 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 		return
 	}
 
-	// Проверяем наличие услуги с указанным ID
 	service, err := app.getLangByID(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] service not found"), err)
 		return
 	}
 
-	// Получаем файл изображения из запроса
 	// file, err := c.FormFile("image")
 	_, err = c.FormFile("image")
 	if err != nil {
@@ -180,7 +185,6 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 	// Получаем ссылку
 	// !minio get imagePath
 
-	// Обновляем путь к изображению в данных услуги (если оно хранится в базе данных)
 	// service.ImgLink = imagePath
 	service.Status = false
 	if err := app.updateLang(&service); err != nil {
@@ -188,7 +192,6 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 		return
 	}
 
-	// Возвращаем JSON-ответ с подтверждением успешного обновления изображения
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Service image updated successfully",
 		"service": service,
@@ -196,7 +199,6 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 }
 
 func (app *App) DeleteService(c *gin.Context) {
-	// Извлекаем ID услуги из параметров запроса
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -204,7 +206,6 @@ func (app *App) DeleteService(c *gin.Context) {
 		return
 	}
 
-	// Удаляем запись услуги из базы данных
 	if err := app.deleteLang(uint(id)); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete service"), err)
 		return
@@ -213,43 +214,37 @@ func (app *App) DeleteService(c *gin.Context) {
 	// Удаляем изображение услуги
 	//! minio delete image
 
-	// Возвращаем JSON-ответ с подтверждением успешного удаления
 	c.JSON(http.StatusOK, gin.H{
 		"message":   "Service deleted successfully",
 		"serviceID": id,
 	})
 }
 
-type RequestAdd struct {
+type AddServiceRequest struct {
 	IDLang uint `json:"id_lang"`
 }
 
 func (app *App) AddServiceToDraft(c *gin.Context) {
-	var req RequestAdd
+	var req AddServiceRequest
 
-	// Парсим данные запроса в структуру RequestAdd
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c, http.StatusBadRequest, errors.New("[err] invalid data format"), err)
+		handleError(c, http.StatusBadRequest, errors.New("[err] invalid JSON format or missing fields"), err)
 		return
 	}
-	log.Printf("[info] AddService called: IDUser=%d, IDLang=%d", app.userID, req.IDLang)
 
-	// Создаем черновик, если он еще не существует, и получаем его ID
 	projectID, err := app.createProject(app.userID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] error creating project"), err)
+		handleError(c, http.StatusInternalServerError, errors.New("[err] unable to create project"), err)
 		return
 	}
 
-	// Добавляем услугу в черновик
 	if err := app.createFile(projectID, req.IDLang); err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to add service to draft"), err)
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to create file for service draft"), err)
 		return
 	}
 
-	// Успешное добавление услуги в черновик
 	c.JSON(http.StatusOK, gin.H{
-		"message":   "Service added to draft successfully",
+		"message":   "Service successfully added to draft",
 		"projectID": projectID,
 	})
 }

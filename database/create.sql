@@ -26,10 +26,11 @@ CREATE TABLE projects (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     creation_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deletion_time TIMESTAMP,
+    formation_time TIMESTAMP,
     completion_time TIMESTAMP,
     status INT NOT NULL, 
     moderator_id INT REFERENCES users(id) ON DELETE SET NULL,
+    moderator_comment TEXT,
     count INT DEFAULT 0
 );
 
