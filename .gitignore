@@ -19,3 +19,9 @@
 
 # Go workspace file
 go.work
+
+# Ignore VSCode settings folder
+.vscode/
+
+# Ignore bin directory
+bin/
