@@ -2,9 +2,8 @@ package backend
 
 import (
 	"errors"
-	"log"
 	"net/http"
-	"rip/database"
+	database "rip/pkg"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -13,9 +12,9 @@ import (
 func (app *App) GetProjectList(c *gin.Context) {
 	startDateStr := c.Query("start_date") // формат: "YYYY-MM-DD"
 	endDateStr := c.Query("end_date")     // формат: "YYYY-MM-DD"
-	statusStr := c.Query("status")
+	status := c.Query("status")
 
-	projects, err := app.filterProjects(startDateStr, endDateStr, statusStr)
+	projects, err := app.filterProjects(startDateStr, endDateStr, status)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to retrieve projects"), err)
 		return
@@ -105,18 +104,23 @@ func (app *App) UpdateProject(c *gin.Context) {
 }
 
 type AddProjectRequest struct {
-	IDProject uint            `form:"id_project" json:"id_project"`
-	FileCodes map[uint]string `form:"file_codes" json:"file_codes"`
+	FileCodes map[uint]string `json:"file_codes"`
 }
 
 func (app *App) SubmitProject(c *gin.Context) {
+	idStr := c.Param("id")
+	projectID, err := strconv.Atoi(idStr)
+	if err != nil {
+		handleError(c, http.StatusBadRequest, errors.New("[err] invalid id project"), err)
+	}
+
 	var req AddProjectRequest
-	if err := c.ShouldBind(&req); err != nil {
+	if err = c.ShouldBind(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid data format"), err)
 		return
 	}
 
-	project, err := app.getProjectByID(req.IDProject)
+	project, err := app.getProjectByID(uint(projectID))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
 		return
@@ -127,12 +131,11 @@ func (app *App) SubmitProject(c *gin.Context) {
 		return
 	}
 
-	if err := app.updateFilesCode(req.IDProject, req.FileCodes); err != nil {
+	if err := app.updateFilesCode(project.ID, req.FileCodes); err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] failed to update file"), err)
 		return
 	}
 
-	// Обновляем статус проекта на "сформирован" (или статус 2)
 	project.Status = database.Created
 	if err := app.updateProject(&project); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update project"), err)
@@ -145,68 +148,25 @@ func (app *App) SubmitProject(c *gin.Context) {
 	})
 }
 
-type DeleteProjectRequest struct {
-	IDProject uint            `form:"id_project" json:"id_project"`
-	FileCodes map[uint]string `form:"file_codes" json:"file_codes"`
-}
-
-func (app *App) DeleteProject(c *gin.Context) {
-	var req DeleteProjectRequest
-	if err := c.ShouldBind(&req); err != nil {
-		handleError(c, http.StatusBadRequest, errors.New("[err] invalid data format"), err)
-		return
-	}
-
-	project, err := app.getProjectByID(req.IDProject)
-	if err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
-		return
-	}
-
-	if app.userID != project.UserID {
-		handleError(c, http.StatusNotFound, errors.New("[err] project does not belong to the user"), err)
-		return
-	}
-
-	if project.FormationTime != nil {
-		handleError(c, http.StatusBadRequest, errors.New("[err] project cannot be deleted, formation date found"))
-		return
-	}
-
-	if err := app.updateFilesCode(req.IDProject, req.FileCodes); err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] failed to update file"), err)
-		return
-	}
-
-	// Обновляем статус проекта на "удалён" (или статус 1)
-	project.Status = database.Deleted
-	if err := app.updateProject(&project); err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update project"), err)
-		return
-	}
-
-	log.Printf("[info] Project %d deleted successfully", req.IDProject)
-	c.JSON(http.StatusOK, gin.H{
-		"message":   "Project deleted successfully",
-		"projectID": req.IDProject,
-	})
-}
-
 type CompleteProjectRequest struct {
-	IDProject   uint            `form:"id_project" json:"id_project"`
-	ModeratorID uint            `json:"moderator_id"`
-	Status      database.Status `json:"status"`
-	Comment     string          `json:"comment"`
+	Status  database.Status `json:"status"`
+	Comment string          `json:"comment"`
 }
 
 func (app *App) CompleteProject(c *gin.Context) {
+	idStr := c.Param("id")
+	projectID, err := strconv.Atoi(idStr)
+	if err != nil {
+		handleError(c, http.StatusBadRequest, errors.New("[err] invalid id project"), err)
+	}
+
 	var req CompleteProjectRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid request format"), err)
 		return
 	}
 
-	project, err := app.getProjectByID(req.IDProject)
+	project, err := app.getProjectByID(uint(projectID))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
 		return
@@ -217,12 +177,7 @@ func (app *App) CompleteProject(c *gin.Context) {
 		return
 	}
 
-	if req.ModeratorID != 0 {
-		project.ModeratorID = &req.ModeratorID
-	} else {
-		handleError(c, http.StatusBadRequest, errors.New("[err] moderator ID is required"))
-		return
-	}
+	project.ModeratorID = &app.userID
 
 	if req.Status == database.Completed || req.Status == database.Rejected {
 		project.Status = req.Status
@@ -243,5 +198,56 @@ func (app *App) CompleteProject(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Project completed successfully",
 		"project": project,
+	})
+}
+
+type DeleteProjectRequest struct {
+	FileCodes map[uint]string `json:"file_codes"`
+}
+
+func (app *App) DeleteProject(c *gin.Context) {
+	idStr := c.Param("id")
+	projectID, err := strconv.Atoi(idStr)
+	if err != nil {
+		handleError(c, http.StatusBadRequest, errors.New("[err] invalid id project"), err)
+	}
+
+	var req DeleteProjectRequest
+	if err := c.ShouldBind(&req); err != nil {
+		handleError(c, http.StatusBadRequest, errors.New("[err] invalid data format"), err)
+		return
+	}
+
+	project, err := app.getProjectByID(uint(projectID))
+	if err != nil {
+		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
+		return
+	}
+
+	if app.userID != project.UserID {
+		handleError(c, http.StatusNotFound, errors.New("[err] project does not belong to the user"), err)
+		return
+	}
+
+	if project.FormationTime != nil {
+		handleError(c, http.StatusBadRequest, errors.New("[err] project cannot be deleted, formation date found"))
+		return
+	}
+
+	if err := app.updateFilesCode(project.ID, req.FileCodes); err != nil {
+		handleError(c, http.StatusNotFound, errors.New("[err] failed to update file"), err)
+		return
+	}
+
+	// Обновляем статус проекта на "удалён" (или статус 1)
+	project.Status = database.Deleted
+	if err := app.updateProject(&project); err != nil {
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update project"), err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Project deleted successfully",
+		"status":  true,
 	})
 }

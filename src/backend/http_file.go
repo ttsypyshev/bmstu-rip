@@ -43,7 +43,7 @@ func (app *App) DeleteFileFromProject(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "File successfully deleted from project",
-		"project": project,
+		"status":  true,
 	})
 }
 
@@ -51,7 +51,8 @@ type UpdateFileRequest struct {
 	ProjectID uint   `json:"project_id" binding:"required"`
 	LangID    uint   `json:"lang_id" binding:"required"`
 	Code      string `json:"code"`
-	AutoCheck *int   `json:"auto_check"`
+	FileName  string `json:"filename"`
+	Comment   string `json:"comment"`
 }
 
 func (app *App) UpdateFileInProject(c *gin.Context) {
@@ -92,10 +93,16 @@ func (app *App) UpdateFileInProject(c *gin.Context) {
 		file.LangID = req.LangID
 	}
 
-	file.Code = req.Code
+	if req.Code != "" {
+		file.Code = req.Code
+	}
 
-	if req.AutoCheck != nil {
-		file.AutoCheck = *req.AutoCheck
+	if req.FileName != "" {
+		file.FileName = req.FileName
+	}
+
+	if req.Comment != "" {
+		file.Comment = req.Comment
 	}
 
 	if err := app.updateFile(&file); err != nil {

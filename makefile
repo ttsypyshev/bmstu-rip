@@ -32,4 +32,4 @@ run: build kill_process
 # Запуск Go-программы
 debug: build kill_process
 	@echo "Запуск Go-программы (в debug режиме)..."
-	@./$(EXECUTABLE)
+	@go run $(SRC_DIR)/main.go

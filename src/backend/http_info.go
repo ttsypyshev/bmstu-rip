@@ -54,7 +54,6 @@ func (app *App) GetServiceByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"info": lang,
-		// "list":  ParseList(lang.List), // Uncomment if needed later
 	})
 }
 
@@ -246,8 +245,8 @@ func (app *App) DeleteService(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":   "Service deleted successfully",
-		"serviceID": id,
+		"message": "Service deleted successfully",
+		"status":  true,
 	})
 }
 

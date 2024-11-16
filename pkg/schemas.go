@@ -62,7 +62,7 @@ func (j *JSONB) Scan(value interface{}) error {
 type User struct {
 	ID       uint   `gorm:"primaryKey;autoIncrement"`
 	Name     string `gorm:"size:50"`
-	Email    string `gorm:"type:text;unique"`
+	Email    *string `gorm:"type:text;unique"`
 	Login    string `gorm:"size:50;unique;not null"`
 	Password string `gorm:"type:text;not null" json:"-"`
 	IsAdmin  bool   `gorm:"default:false"`

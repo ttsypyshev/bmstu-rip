@@ -11,9 +11,9 @@ import (
 
 type RegisterUserRequest struct {
 	Name     string `json:"name"`
+	Email    string `json:"email"`
 	Login    string `json:"login"`
 	Password string `json:"password"`
-	IsAdmin  *bool  `json:"is_admin"`
 }
 
 func (app *App) RegisterUser(c *gin.Context) {
@@ -23,12 +23,7 @@ func (app *App) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	isAdmin := false
-	if req.IsAdmin != nil {
-		isAdmin = *req.IsAdmin
-	}
-
-	userID, err := app.createUser(req.Login, req.Password, req.Name, isAdmin)
+	userID, err := app.createUser(req.Login, req.Password, req.Name, req.Email)
 	if err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] failed to save user in the database"), err)
 		return
@@ -41,10 +36,9 @@ func (app *App) RegisterUser(c *gin.Context) {
 }
 
 type UpdateUserProfileRequest struct {
-	Login    string `json:"login"`
 	Password string `json:"password"`
+	Email    string `json:"email"`
 	Name     string `json:"name"`
-	IsAdmin  *bool  `json:"is_admin"`
 }
 
 func (app *App) UpdateUserProfile(c *gin.Context) {
@@ -54,7 +48,7 @@ func (app *App) UpdateUserProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := app.findUserByLogin(req.Login)
+	user, err := app.getUserByID(app.userID)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] user not found"), err)
 		return
@@ -63,11 +57,11 @@ func (app *App) UpdateUserProfile(c *gin.Context) {
 	if req.Name != "" {
 		user.Name = req.Name
 	}
+	if req.Email != "" {
+		user.Email = &req.Email
+	}
 	if req.Password != "" {
 		user.Password = req.Password
-	}
-	if req.IsAdmin != nil {
-		user.IsAdmin = *req.IsAdmin
 	}
 
 	if err := app.updateUser(&user); err != nil {

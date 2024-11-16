@@ -3,7 +3,7 @@ package backend
 import (
 	"errors"
 	"fmt"
-	"rip/database"
+	database "rip/pkg"
 	"strings"
 	"time"
 
@@ -248,7 +248,7 @@ func (app *App) deleteFile(projectID, fileID uint) error {
 	return nil
 }
 
-func (app *App) createUser(login, password, name string, is_admin bool) (uint, error) {
+func (app *App) createUser(login, password, name, email string) (uint, error) {
 	var user DbUser
 
 	if login == "" {
@@ -265,7 +265,11 @@ func (app *App) createUser(login, password, name string, is_admin bool) (uint, e
 		user.Name = name
 	}
 
-	user.IsAdmin = is_admin
+	if email != "" {
+		user.Email = &email
+	} else {
+		user.Email = nil
+	}
 
 	var existingUser DbUser
 	if err := app.db.db.Where("login = ?", login).First(&existingUser).Error; err == nil {
@@ -455,6 +459,14 @@ func (app *App) matchPassword(login, password string) (bool, DbUser, error) {
 
 	return false, DbUser{}, nil
 }
+
+// func (app *App) checkModerator(userID uint) bool {
+// 	user, err := app.getUserByID(userID)
+// 	if err != nil {
+// 		return false
+// 	}
+// 	return user.IsAdmin
+// }
 
 // // Хеширование пароля
 // func hashPassword(password string) (string, error) {
