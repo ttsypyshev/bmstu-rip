@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"rip/database"
-	"strconv"
 	"strings"
 	"time"
 
@@ -159,7 +158,7 @@ func (app *App) createProject(userID uint) (uint, error) {
 		newProject := DbProject{
 			UserID:       userID,
 			CreationTime: time.Now(),
-			Status:       0, // 0 - черновик
+			Status:       database.Draft,
 		}
 
 		if err := app.db.db.Create(&newProject).Error; err != nil {
@@ -177,14 +176,14 @@ func (app *App) updateProject(project *DbProject) error {
 		return fmt.Errorf("project ID is required for update")
 	}
 
-	if project.Status == 1 || project.Status == 2 {
+	if project.Status == database.Deleted || project.Status == database.Created {
 		now := time.Now()
 		project.FormationTime = &now
 	} else {
 		project.FormationTime = nil
 	}
 
-	if project.Status == 3 || project.Status == 4 {
+	if project.Status == database.Completed || project.Status == database.Rejected {
 		now := time.Now()
 		project.CompletionTime = &now
 	} else {
@@ -310,7 +309,7 @@ func (app *App) deleteUser(userID uint) error {
 	return nil
 }
 
-// Фильтрация услег по запросу
+// Фильтрация услуг по запросу
 func (app *App) filterLangsByQuery(query string) ([]DbLang, error) {
 	var filteredLangs []DbLang
 	lowerQuery := "%" + strings.ToLower(query) + "%"
@@ -327,7 +326,7 @@ func (app *App) filterLangsByQuery(query string) ([]DbLang, error) {
 func findLastDraft(app *App, userID uint) (uint, error) {
 	var lastProject DbProject
 
-	if err := app.db.db.Where("status = ? AND user_id = ?", 0, userID).First(&lastProject).Error; err != nil {
+	if err := app.db.db.Where("status = ? AND user_id = ?", database.Draft, userID).First(&lastProject).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return 0, nil
 		}
@@ -337,9 +336,9 @@ func findLastDraft(app *App, userID uint) (uint, error) {
 }
 
 // Функция для фильтрации проектов по дате и статусу
-func (app *App) filterProjects(startDate, endDate, statusStr string) ([]DbProject, error) {
+func (app *App) filterProjects(startDate, endDate, status string) ([]DbProject, error) {
 	var projects []DbProject
-	query := app.db.db.Model(&DbProject{}).Preload("User").Preload("Moderator").Where("status NOT IN (?)", []int{1, 0})
+	query := app.db.db.Model(&DbProject{}).Preload("User").Preload("Moderator").Where("status NOT IN (?)", []string{string(database.Draft), string(database.Deleted)})
 
 	if startDate != "" {
 		start, err := time.Parse("2006-01-02", startDate)
@@ -357,11 +356,7 @@ func (app *App) filterProjects(startDate, endDate, statusStr string) ([]DbProjec
 		query = query.Where("creation_time <= ?", end)
 	}
 
-	if statusStr != "" {
-		status, err := strconv.Atoi(statusStr)
-		if err != nil {
-			return nil, err
-		}
+	if status != "" {
 		query = query.Where("status = ?", status)
 	}
 
@@ -427,7 +422,7 @@ func (app *App) findFile(projectID, langID uint) (DbFile, error) {
 }
 
 // Обновление статуса проекта
-func (app *App) updateProjectStatus(projectID uint, newStatus uint) error {
+func (app *App) updateProjectStatus(projectID uint, newStatus string) error {
 	query := "UPDATE projects SET status = ? WHERE id = ?"
 
 	result := app.db.db.Exec(query, newStatus, projectID)

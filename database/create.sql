@@ -1,23 +1,27 @@
+-- Создание ENUM типа для статуса проекта
+CREATE TYPE project_status AS ENUM ('draft', 'deleted', 'created', 'completed', 'rejected');
+
 -- Пользователи (Users)
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255), 
-    login VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    name VARCHAR(50),
+    email TEXT UNIQUE,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    password TEXT NOT NULL,
     is_admin BOOLEAN DEFAULT FALSE
 );
 
 -- Услуги (Languages)
 CREATE TABLE langs (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(50) NOT NULL,
     short_description VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     img_link VARCHAR(255),
-    author VARCHAR(255),
+    author VARCHAR(50),
     year CHAR(4),
     version VARCHAR(50),
-    list TEXT,
+    list JSONB,
     status BOOLEAN NOT NULL DEFAULT TRUE
 );
 
@@ -28,10 +32,10 @@ CREATE TABLE projects (
     creation_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     formation_time TIMESTAMP,
     completion_time TIMESTAMP,
-    status INT NOT NULL, 
+    status project_status NOT NULL,  -- Использование ENUM типа
     moderator_id INT REFERENCES users(id) ON DELETE SET NULL,
     moderator_comment TEXT,
-    count INT DEFAULT 0
+    count INT DEFAULT 0  -- Количество файлов в проекте
 );
 
 -- Файлы (Files)
@@ -40,5 +44,8 @@ CREATE TABLE files (
     lang_id INT REFERENCES langs(id) ON DELETE CASCADE NOT NULL,
     project_id INT REFERENCES projects(id) ON DELETE CASCADE NOT NULL,
     code TEXT,
-    autocheck INT DEFAULT 0
+    file_name VARCHAR(255),
+    file_size BIGINT DEFAULT 0,
+    comment TEXT,
+    auto_check INT DEFAULT 0
 );

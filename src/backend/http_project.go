@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"rip/database"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -52,16 +53,11 @@ func (app *App) GetProjectByID(c *gin.Context) {
 }
 
 type UpdateProjectRequest struct {
-	Status  *int   `json:"status"`
-	Comment string `json:"comment"`
+	Status  database.Status `json:"status"`
+	Comment string          `json:"comment"`
 }
 
 func (app *App) UpdateProject(c *gin.Context) {
-	if app.isAdmin {
-		handleError(c, http.StatusBadRequest, errors.New("[err] this is not the task of this user"))
-		return
-	}
-
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -86,15 +82,15 @@ func (app *App) UpdateProject(c *gin.Context) {
 		return
 	}
 
-	if req.Status != nil {
-		project.Status = *req.Status
+	if req.Status != "" {
+		project.Status = req.Status
 	} else {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid status"))
 		return
 	}
 
 	if req.Comment != "" {
-		project.Comment = req.Comment
+		project.ModeratorComment = req.Comment
 	}
 
 	if err := app.updateProject(&project); err != nil {
@@ -114,11 +110,6 @@ type AddProjectRequest struct {
 }
 
 func (app *App) SubmitProject(c *gin.Context) {
-	if app.isAdmin {
-		handleError(c, http.StatusBadRequest, errors.New("[err] this is not the task of this user"))
-		return
-	}
-
 	var req AddProjectRequest
 	if err := c.ShouldBind(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid data format"), err)
@@ -142,7 +133,7 @@ func (app *App) SubmitProject(c *gin.Context) {
 	}
 
 	// Обновляем статус проекта на "сформирован" (или статус 2)
-	project.Status = 2
+	project.Status = database.Created
 	if err := app.updateProject(&project); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update project"), err)
 		return
@@ -160,11 +151,6 @@ type DeleteProjectRequest struct {
 }
 
 func (app *App) DeleteProject(c *gin.Context) {
-	if app.isAdmin {
-		handleError(c, http.StatusBadRequest, errors.New("[err] this is not the task of this user"))
-		return
-	}
-
 	var req DeleteProjectRequest
 	if err := c.ShouldBind(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid data format"), err)
@@ -193,7 +179,7 @@ func (app *App) DeleteProject(c *gin.Context) {
 	}
 
 	// Обновляем статус проекта на "удалён" (или статус 1)
-	project.Status = 1
+	project.Status = database.Deleted
 	if err := app.updateProject(&project); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update project"), err)
 		return
@@ -207,18 +193,13 @@ func (app *App) DeleteProject(c *gin.Context) {
 }
 
 type CompleteProjectRequest struct {
-	IDProject   uint   `form:"id_project" json:"id_project"`
-	ModeratorID uint   `json:"moderator_id"`
-	Status      int    `json:"status"`
-	Comment     string `json:"comment"`
+	IDProject   uint            `form:"id_project" json:"id_project"`
+	ModeratorID uint            `json:"moderator_id"`
+	Status      database.Status `json:"status"`
+	Comment     string          `json:"comment"`
 }
 
 func (app *App) CompleteProject(c *gin.Context) {
-	if !app.isAdmin {
-		handleError(c, http.StatusBadRequest, errors.New("[err] user does not have sufficient rights"))
-		return
-	}
-
 	var req CompleteProjectRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid request format"), err)
@@ -243,7 +224,7 @@ func (app *App) CompleteProject(c *gin.Context) {
 		return
 	}
 
-	if req.Status == 3 || req.Status == 4 {
+	if req.Status == database.Completed || req.Status == database.Rejected {
 		project.Status = req.Status
 	} else {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid status"))
@@ -251,7 +232,7 @@ func (app *App) CompleteProject(c *gin.Context) {
 	}
 
 	if req.Comment != "" {
-		project.Comment = req.Comment
+		project.ModeratorComment = req.Comment
 	}
 
 	if err := app.updateProject(&project); err != nil {

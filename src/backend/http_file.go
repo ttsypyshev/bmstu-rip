@@ -13,11 +13,6 @@ type DeleteFileRequest struct {
 }
 
 func (app *App) DeleteFileFromProject(c *gin.Context) {
-	if app.isAdmin {
-		handleError(c, http.StatusBadRequest, errors.New("[err] this is not the task of this user"))
-		return
-	}
-
 	var req DeleteFileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid request format"), err)
@@ -60,11 +55,6 @@ type UpdateFileRequest struct {
 }
 
 func (app *App) UpdateFileInProject(c *gin.Context) {
-	if app.isAdmin {
-		handleError(c, http.StatusBadRequest, errors.New("[err] this is not the task of this user"))
-		return
-	}
-
 	var req UpdateFileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid request format"), err)

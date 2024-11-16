@@ -94,13 +94,13 @@ func handleError(c *gin.Context, statusCode int, err error, additionalErrs ...er
 	log.Printf("Error: %s", errorMessages.String())
 }
 
-func ParseQueryParam(c *gin.Context, key string) (int, error) {
-	param := c.Query(key)
-	if param == "" {
-		return 0, nil
-	}
-	return strconv.Atoi(param)
-}
+// func ParseQueryParam(c *gin.Context, key string) (int, error) {
+// 	param := c.Query(key)
+// 	if param == "" {
+// 		return 0, nil
+// 	}
+// 	return strconv.Atoi(param)
+// }
 
 func (app *App) GetFilteredLangs(query string) ([]DbLang, error) {
 	if query != "" {

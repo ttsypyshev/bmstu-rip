@@ -59,21 +59,16 @@ func (app *App) GetServiceByID(c *gin.Context) {
 }
 
 type CreateServiceRequest struct {
-	Name             string `json:"name"`
-	ShortDescription string `json:"short_description"`
-	Description      string `json:"description"`
-	Author           string `json:"author"`
-	Year             string `json:"year"`
-	Version          string `json:"version"`
-	List             string `json:"list"`
+	Name             string            `json:"name"`
+	ShortDescription string            `json:"short_description"`
+	Description      string            `json:"description"`
+	Author           string            `json:"author"`
+	Year             string            `json:"year"`
+	Version          string            `json:"version"`
+	List             map[string]string `json:"list"`
 }
 
 func (app *App) CreateService(c *gin.Context) {
-	if !app.isAdmin {
-		handleError(c, http.StatusBadRequest, errors.New("[err] user does not have sufficient rights"))
-		return
-	}
-
 	var input CreateServiceRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid input data: unable to parse JSON"), err)
@@ -103,21 +98,16 @@ func (app *App) CreateService(c *gin.Context) {
 }
 
 type UpdateServiceRequest struct {
-	Name             string `json:"name"`
-	ShortDescription string `json:"short_description"`
-	Description      string `json:"description"`
-	Author           string `json:"author"`
-	Year             string `json:"year"`
-	Version          string `json:"version"`
-	List             string `json:"list"`
+	Name             string            `json:"name"`
+	ShortDescription string            `json:"short_description"`
+	Description      string            `json:"description"`
+	Author           string            `json:"author"`
+	Year             string            `json:"year"`
+	Version          string            `json:"version"`
+	List             map[string]string `json:"list"`
 }
 
 func (app *App) UpdateService(c *gin.Context) {
-	if !app.isAdmin {
-		handleError(c, http.StatusBadRequest, errors.New("[err] user does not have sufficient rights"))
-		return
-	}
-
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -155,7 +145,7 @@ func (app *App) UpdateService(c *gin.Context) {
 	if input.Version != "" {
 		service.Version = input.Version
 	}
-	if input.List != "" {
+	if len(input.List) != 0 {
 		service.List = input.List
 	}
 
@@ -171,11 +161,6 @@ func (app *App) UpdateService(c *gin.Context) {
 }
 
 func (app *App) UpdateServiceImage(c *gin.Context) {
-	if !app.isAdmin {
-		handleError(c, http.StatusBadRequest, errors.New("[err] user does not have sufficient rights"))
-		return
-	}
-
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -229,11 +214,6 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 }
 
 func (app *App) DeleteService(c *gin.Context) {
-	if !app.isAdmin {
-		handleError(c, http.StatusBadRequest, errors.New("[err] user does not have sufficient rights"))
-		return
-	}
-
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -276,11 +256,6 @@ type AddServiceRequest struct {
 }
 
 func (app *App) AddServiceToDraft(c *gin.Context) {
-	if app.isAdmin {
-		handleError(c, http.StatusBadRequest, errors.New("[err] this is not the task of this user"))
-		return
-	}
-
 	var req AddServiceRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
