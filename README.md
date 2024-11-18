@@ -31,3 +31,9 @@ make run
 - [Создать базу данных](doc/db/create.sql)
 - [Вставить данные в базу данных](doc/db/insert.sql)
 - [Удалить базу данных](doc/db/drop.sql)
+
+## Работа с redis
+
+```sh
+sudo docker exec -it redis redis-cli 
+```
