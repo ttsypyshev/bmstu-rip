@@ -3,7 +3,7 @@ package backend
 import (
 	"errors"
 	"net/http"
-	database "rip/pkg"
+	database "rip/pkg/database"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -76,7 +76,7 @@ func (app *App) UpdateProject(c *gin.Context) {
 		return
 	}
 
-	if app.userID != project.UserID {
+	if *app.userID != project.UserID {
 		handleError(c, http.StatusNotFound, errors.New("[err] project does not belong to the user"), err)
 		return
 	}
@@ -126,7 +126,7 @@ func (app *App) SubmitProject(c *gin.Context) {
 		return
 	}
 
-	if app.userID != project.UserID {
+	if *app.userID != project.UserID {
 		handleError(c, http.StatusNotFound, errors.New("[err] project does not belong to the user"), err)
 		return
 	}
@@ -177,7 +177,7 @@ func (app *App) CompleteProject(c *gin.Context) {
 		return
 	}
 
-	project.ModeratorID = &app.userID
+	project.ModeratorID = app.userID
 
 	if req.Status == database.Completed || req.Status == database.Rejected {
 		project.Status = req.Status
@@ -224,7 +224,7 @@ func (app *App) DeleteProject(c *gin.Context) {
 		return
 	}
 
-	if app.userID != project.UserID {
+	if *app.userID != project.UserID {
 		handleError(c, http.StatusNotFound, errors.New("[err] project does not belong to the user"), err)
 		return
 	}

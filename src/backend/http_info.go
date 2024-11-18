@@ -1,14 +1,11 @@
 package backend
 
 import (
-	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/minio/minio-go/v7"
 )
 
 func (app *App) GetServiceList(c *gin.Context) {
@@ -19,7 +16,7 @@ func (app *App) GetServiceList(c *gin.Context) {
 		return
 	}
 
-	projectID, err := findLastDraft(app, app.userID)
+	projectID, err := findLastDraft(app, *app.userID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] unable to find the last draft project for the user"), err)
 		return
@@ -179,24 +176,11 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 		return
 	}
 
-	src, err := file.Open()
+	imageURL, err := app.uploadImageToMinIO(file)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to open image file"), err)
+		handleError(c, http.StatusInternalServerError, err, nil)
 		return
 	}
-	defer src.Close()
-
-	// Загрузка изображения в MinIO
-	_, err = app.minioClient.PutObject(context.Background(), "code-inspector", file.Filename, src, file.Size, minio.PutObjectOptions{
-		ContentType: file.Header.Get("Content-Type"),
-	})
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to upload image to MinIO"), err)
-		return
-	}
-
-	// Генерация публичной ссылки на изображение (если MinIO настроен на публичный доступ)
-	imageURL := fmt.Sprintf("%s/%s/%s", app.minioClient.EndpointURL(), "code-inspector", file.Filename)
 
 	service.ImgLink = imageURL
 	service.Status = false
@@ -226,17 +210,9 @@ func (app *App) DeleteService(c *gin.Context) {
 		return
 	}
 
-	// Удаляем изображение из MinIO, если оно существует
-	if service.ImgLink != "" {
-		// Генерация имени объекта для удаления из MinIO
-		objectName := extractObjectNameFromURL(service.ImgLink)
-
-		// Удаляем изображение из MinIO
-		err = app.minioClient.RemoveObject(context.Background(), "code-inspector", objectName, minio.RemoveObjectOptions{})
-		if err != nil {
-			handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete image from MinIO"), err)
-			return
-		}
+	if err := app.deleteImageFromMinIO(service.ImgLink); err != nil {
+		handleError(c, http.StatusInternalServerError, err, nil)
+		return
 	}
 
 	if err := app.deleteLang(uint(id)); err != nil {
@@ -262,7 +238,7 @@ func (app *App) AddServiceToDraft(c *gin.Context) {
 		return
 	}
 
-	projectID, err := app.createProject(app.userID)
+	projectID, err := app.createProject(*app.userID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] unable to create project"), err)
 		return

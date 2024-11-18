@@ -3,10 +3,12 @@ package backend
 import (
 	"errors"
 	"fmt"
-	database "rip/pkg"
+	database "rip/pkg/database"
+	env "rip/pkg/settings"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -25,7 +27,7 @@ type Db struct {
 
 func Migrate() error {
 	_ = godotenv.Load()
-	db, err := gorm.Open(postgres.Open(FromEnvDB()), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(env.FromEnvDB()), &gorm.Config{})
 	if err != nil {
 		return err
 	}
@@ -114,8 +116,8 @@ func (app *App) getFileByID(fileID uint) (DbFile, error) {
 	return getByID[DbFile](app, fileID)
 }
 
-func (app *App) getUserByID(userID uint) (DbUser, error) {
-	return getByID[DbUser](app, userID)
+func (app *App) getUserByID(userID uuid.UUID) (DbUser, error) {
+	return getByID[DbUser](app, uint(userID.ID()))
 }
 
 func (app *App) createLang(lang *DbLang) (uint, error) {
@@ -148,7 +150,7 @@ func (app *App) deleteLang(langID uint) error {
 	return nil
 }
 
-func (app *App) createProject(userID uint) (uint, error) {
+func (app *App) createProject(userID uuid.UUID) (uint, error) {
 	projectID, err := findLastDraft(app, userID)
 	if err != nil {
 		return 0, err
@@ -248,18 +250,18 @@ func (app *App) deleteFile(projectID, fileID uint) error {
 	return nil
 }
 
-func (app *App) createUser(login, password, name, email string) (uint, error) {
+func (app *App) createUser(login, password, name, email string) (uuid.UUID, error) {
 	var user DbUser
 
 	if login == "" {
-		return 0, fmt.Errorf("login is required")
+		return uuid.Nil, fmt.Errorf("login is required")
 	}
 	user.Login = login
 
-	if password == "" {
-		return 0, fmt.Errorf("password is required")
+	if len(password) == 0 {
+		return uuid.Nil, fmt.Errorf("password is required")
 	}
-	user.Password = password
+	user.Password = []byte(password)
 
 	if name != "" {
 		user.Name = name
@@ -271,29 +273,27 @@ func (app *App) createUser(login, password, name, email string) (uint, error) {
 		user.Email = nil
 	}
 
+	user.Role = database.Student
+
 	var existingUser DbUser
 	if err := app.db.db.Where("login = ?", login).First(&existingUser).Error; err == nil {
-		return 0, fmt.Errorf("user with login %s already exists", login)
+		return uuid.Nil, fmt.Errorf("user with login %s already exists", login)
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return 0, err
+		return uuid.Nil, err
 	}
 
 	if err := app.db.db.Create(&user).Error; err != nil {
-		return 0, err
+		return uuid.Nil, err
 	}
 
 	return user.ID, nil
 }
 
 func (app *App) updateUser(user *DbUser) error {
-	if user.ID == 0 {
-		return fmt.Errorf("user ID is required for update")
-	}
-
 	if err := app.db.db.Model(&DbUser{}).Where("id = ?", user.ID).Updates(map[string]interface{}{
-		"name":     user.Name,
-		"login":    user.Login,
-		"is_admin": user.IsAdmin,
+		"name":  user.Name,
+		"login": user.Login,
+		"role":  user.Role,
 	}).Error; err != nil {
 		return err
 	}
@@ -301,11 +301,7 @@ func (app *App) updateUser(user *DbUser) error {
 	return nil
 }
 
-func (app *App) deleteUser(userID uint) error {
-	if userID == 0 {
-		return fmt.Errorf("user ID must be greater than 0")
-	}
-
+func (app *App) deleteUser(userID uuid.UUID) error {
 	if err := app.db.db.Delete(&DbUser{}, userID).Error; err != nil {
 		return err
 	}
@@ -327,7 +323,7 @@ func (app *App) filterLangsByQuery(query string) ([]DbLang, error) {
 }
 
 // Поиск последнего черновика для пользователя
-func findLastDraft(app *App, userID uint) (uint, error) {
+func findLastDraft(app *App, userID uuid.UUID) (uint, error) {
 	var lastProject DbProject
 
 	if err := app.db.db.Where("status = ? AND user_id = ?", database.Draft, userID).First(&lastProject).Error; err != nil {
@@ -447,40 +443,15 @@ func (app *App) findUserByLogin(login string) (DbUser, error) {
 }
 
 // Сравнение переданного пароля с паролем пользователя
-func (app *App) matchPassword(login, password string) (bool, DbUser, error) {
+func (app *App) matchPassword(login string, password string) (bool, DbUser, error) {
 	var user DbUser
 	if err := app.db.db.Where("login = ?", login).First(&user).Error; err != nil {
 		return false, DbUser{}, err
 	}
 
-	if user.Password == password {
+	if user.Password != nil && string(user.Password) == password {
 		return true, user, nil
 	}
 
 	return false, DbUser{}, nil
 }
-
-// func (app *App) checkModerator(userID uint) bool {
-// 	user, err := app.getUserByID(userID)
-// 	if err != nil {
-// 		return false
-// 	}
-// 	return user.IsAdmin
-// }
-
-// // Хеширование пароля
-// func hashPassword(password string) (string, error) {
-// 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-// 	return string(hashed), err
-// }
-
-// // Получение ID текущего пользователя (например, из токена)
-// func getCurrentUserID(c *gin.Context) (uint, error) {
-// 	// Пример: получаем ID пользователя из токена или сессии
-// 	// Это зависит от того, как реализована аутентификация
-// 	userID, exists := c.Get("userID")
-// 	if !exists {
-// 		return 0, errors.New("user ID not found in context")
-// 	}
-// 	return userID.(uint), nil
-// }

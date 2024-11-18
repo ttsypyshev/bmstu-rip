@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"mime/multipart"
+
+	env "rip/pkg/settings"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -12,7 +15,7 @@ import (
 var bucketName string = "code-inspector"
 
 func InitializeMinIO() (*minio.Client, error) {
-	endpoint, accessKey, secretKey, useSSL, err := FromEnvMinIO()
+	endpoint, accessKey, secretKey, useSSL, err := env.FromEnvMinIO()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get MinIO configuration from environment: %v", err)
 	}
@@ -43,4 +46,36 @@ func InitializeMinIO() (*minio.Client, error) {
 	}
 
 	return client, nil
+}
+
+func (app *App) uploadImageToMinIO(file *multipart.FileHeader) (string, error) {
+	src, err := file.Open()
+	if err != nil {
+		return "", fmt.Errorf("[err] failed to open image file: %w", err)
+	}
+	defer src.Close()
+
+	_, err = app.minioClient.PutObject(context.Background(), "code-inspector", file.Filename, src, file.Size, minio.PutObjectOptions{
+		ContentType: file.Header.Get("Content-Type"),
+	})
+	if err != nil {
+		return "", fmt.Errorf("[err] failed to upload image to MinIO: %w", err)
+	}
+
+	imageURL := fmt.Sprintf("%s/%s/%s", app.minioClient.EndpointURL(), "code-inspector", file.Filename)
+	return imageURL, nil
+}
+
+func (app *App) deleteImageFromMinIO(imgLink string) error {
+	if imgLink == "" {
+		return nil
+	}
+
+	objectName := extractObjectNameFromURL(imgLink)
+	err := app.minioClient.RemoveObject(context.Background(), "code-inspector", objectName, minio.RemoveObjectOptions{})
+	if err != nil {
+		return fmt.Errorf("[err] failed to delete image from MinIO: %w", err)
+	}
+
+	return nil
 }

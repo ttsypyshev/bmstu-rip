@@ -1,9 +1,9 @@
 
-INSERT INTO users (name, email, login, password, is_admin) VALUES
-('Timofei Tsypyshev', 'timofeitsypyshev@yandex.ru', 'admin1', 'password123', TRUE),
-(NULL, NULL, 'user1', 'userPass123', FALSE),
-(NULL, NULL, 'user2', 'securePass456', FALSE),
-(NULL, NULL, 'user3', 'myPassword789', FALSE);
+INSERT INTO users (name, email, login, password, role) VALUES
+('Timofei Tsypyshev', 'timofeitsypyshev@yandex.ru', 'admin1', 'password123', 'admin'),
+(NULL, NULL, 'user1', 'userPass123', 'student'),
+(NULL, NULL, 'user2', 'securePass456', 'student'),
+(NULL, NULL, 'user3', 'myPassword789', 'student');
 
 
 
@@ -82,12 +82,36 @@ INSERT INTO langs (name, img_link, short_description, author, year, version, des
 
 
 
-INSERT INTO projects (user_id, creation_time, status, moderator_id, count) VALUES
-(2, NOW(), 'deleted', 1, 2),
-(2, NOW(), 'created', 1, 3),
-(3, NOW(), 'draft', 1, 0),
-(2, NOW(), 'draft', NULL, 0);
-
+INSERT INTO projects (user_id, creation_time, status, moderator_id, count)
+VALUES
+    (
+        (SELECT id FROM users WHERE login = 'user1' LIMIT 1), 
+        NOW(), 
+        'deleted', 
+        (SELECT id FROM users WHERE login = 'admin1' LIMIT 1), 
+        2
+    ),
+    (
+        (SELECT id FROM users WHERE login = 'user1' LIMIT 1), 
+        NOW(), 
+        'created', 
+        (SELECT id FROM users WHERE login = 'admin1' LIMIT 1), 
+        3
+    ),
+    (
+        (SELECT id FROM users WHERE login = 'user2' LIMIT 1), 
+        NOW(), 
+        'draft', 
+        (SELECT id FROM users WHERE login = 'admin1' LIMIT 1), 
+        0
+    ),
+    (
+        (SELECT id FROM users WHERE login = 'user1' LIMIT 1), 
+        NOW(), 
+        'draft', 
+        NULL, 
+        0
+    );
 
 
 

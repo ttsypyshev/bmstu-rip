@@ -1,14 +1,18 @@
+-- Расширение для генерации UUID
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Создание ENUM типа для статуса проекта
 CREATE TYPE project_status AS ENUM ('draft', 'deleted', 'created', 'completed', 'rejected');
+CREATE TYPE user_role AS ENUM ('admin', 'student');
 
 -- Пользователи (Users)
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(50),
     email TEXT UNIQUE,
     login VARCHAR(50) NOT NULL UNIQUE,
     password TEXT NOT NULL,
-    is_admin BOOLEAN DEFAULT FALSE
+    role user_role NOT NULL
 );
 
 -- Услуги (Languages)
@@ -28,12 +32,12 @@ CREATE TABLE langs (
 -- Заявки (Projects)
 CREATE TABLE projects (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,  -- Изменили тип на UUID
     creation_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     formation_time TIMESTAMP,
     completion_time TIMESTAMP,
     status project_status NOT NULL,  -- Использование ENUM типа
-    moderator_id INT REFERENCES users(id) ON DELETE SET NULL,
+    moderator_id UUID REFERENCES users(id) ON DELETE SET NULL,  -- Изменили тип на UUID
     moderator_comment TEXT,
     count INT DEFAULT 0  -- Количество файлов в проекте
 );

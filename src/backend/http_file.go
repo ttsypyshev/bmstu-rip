@@ -25,7 +25,7 @@ func (app *App) DeleteFileFromProject(c *gin.Context) {
 		return
 	}
 
-	if app.userID != project.UserID {
+	if app.userID != &project.UserID {
 		handleError(c, http.StatusNotFound, errors.New("[err] project does not belong to the user"), err)
 		return
 	}
@@ -68,7 +68,7 @@ func (app *App) UpdateFileInProject(c *gin.Context) {
 		return
 	}
 
-	if app.userID != project.UserID {
+	if app.userID != &project.UserID {
 		handleError(c, http.StatusNotFound, errors.New("[err] project does not belong to the user"), err)
 		return
 	}

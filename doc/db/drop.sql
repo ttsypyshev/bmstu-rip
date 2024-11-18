@@ -4,3 +4,4 @@ DROP TABLE IF EXISTS langs CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
 DROP TYPE project_status;
+DROP TYPE user_role;

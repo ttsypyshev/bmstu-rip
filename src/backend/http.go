@@ -31,14 +31,25 @@ func (app *App) SetupRoutes(r *gin.Engine) {
 	// Пользователи (домен: `/user`)
 	r.POST("/user/register", app.RegisterUser)                    // Регистрация нового пользователя.
 	r.PUT("/user/update", app.CheckAuth(), app.UpdateUserProfile) // Изменить данные пользователя (личный кабинет).
-	r.POST("/user/login", app.UserLogin)                          // Аутентификация пользователя.
+	r.POST("/user/login", app.CheckDeAuth(), app.UserLogin)       // Аутентификация пользователя.
 	r.POST("/user/logout", app.CheckAuth(), app.UserLogout)       // Деавторизация пользователя.
 }
 
 func (app *App) CheckAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if app.userID == 0 {
+		if app.userID == nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
+func (app *App) CheckDeAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if app.userID != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User authorized"})
 			c.Abort()
 			return
 		}
@@ -48,7 +59,7 @@ func (app *App) CheckAuth() gin.HandlerFunc {
 
 func (app *App) CheckAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !app.isAdmin {
+		if *app.role != "admin" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
 			c.Abort()
 			return
@@ -59,7 +70,7 @@ func (app *App) CheckAdmin() gin.HandlerFunc {
 
 func (app *App) CheckUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if app.isAdmin {
+		if *app.role != "student" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "User access required"})
 			c.Abort()
 			return

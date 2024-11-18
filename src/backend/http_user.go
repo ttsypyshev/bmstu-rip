@@ -48,7 +48,7 @@ func (app *App) UpdateUserProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := app.getUserByID(app.userID)
+	user, err := app.getUserByID(*app.userID)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] user not found"), err)
 		return
@@ -61,7 +61,7 @@ func (app *App) UpdateUserProfile(c *gin.Context) {
 		user.Email = &req.Email
 	}
 	if req.Password != "" {
-		user.Password = req.Password
+		user.Password = []byte(req.Password)
 	}
 
 	if err := app.updateUser(&user); err != nil {
@@ -97,15 +97,10 @@ func (app *App) UserLogin(c *gin.Context) {
 		return
 	}
 
-	if app.userID == user.ID {
-		handleError(c, http.StatusNotFound, errors.New("[info] user is already logged in"))
-		return
-	}
+	app.userID = &user.ID
+	app.role = &user.Role
 
-	app.userID = user.ID
-	app.isAdmin = user.IsAdmin
-
-	log.Printf("[INFO] user %d logged in. Admin: %t", user.ID, user.IsAdmin)
+	log.Printf("[INFO] user %d logged in. Role: %s", user.ID, user.Role)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User has successfully logged in",
@@ -130,18 +125,129 @@ func (app *App) UserLogout(c *gin.Context) {
 		return
 	}
 
-	if app.userID != user.ID {
+	if *app.userID != user.ID {
 		handleError(c, http.StatusNotFound, errors.New("[info] user are not logged in"))
 		return
 	}
 
-	app.userID = 0
-	app.isAdmin = false
+	app.userID = nil
+	app.role = nil
 
-	log.Printf("[INFO] user %d logged out. Admin: %t", user.ID, user.IsAdmin)
+	log.Printf("[INFO] user %d logged out. Admin: %t", user.ID, user.Role)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User has successfully logged out",
 		"status":  true,
 	})
 }
+
+// type JWTClaims struct {
+// 	jwt.StandardClaims           // все что точно необходимо по RFC
+// 	UserUUID           uuid.UUID `json:"user_uuid"`            // наши данные - uuid этого пользователя в базе данных
+// 	Scopes             []string  `json:"scopes" json:"scopes"` // список доступов в нашей системе
+// }
+
+// type loginReq struct {
+// 	Login    string `json:"login"`
+// 	Password string `json:"password"`
+// }
+
+// type loginResp struct {
+// 	ExpiresIn   time.Duration `json:"expires_in"`
+// 	AccessToken string        `json:"access_token"`
+// 	TokenType   string        `json:"token_type"`
+// }
+
+// func (a *App) Login(gCtx *gin.Context) {
+// 	cfg := a.config
+// 	req := &loginReq{}
+
+// 	err := json.NewDecoder(gCtx.Request.Body).Decode(req)
+// 	if err != nil {
+// 		gCtx.AbortWithError(http.StatusBadRequest, err)
+// 		return
+// 	}
+
+// 	if req.Login == login && req.Password == password {
+// 		// значит проверка пройдена
+// 		// генерируем ему jwt
+// 		token := jwt.NewWithClaims(cfg.JWT.SigningMethod, &ds.JWTClaims{
+// 			StandardClaims: jwt.StandardClaims{
+// 				ExpiresAt: time.Now().Add(cfg.JWT.ExpiresIn).Unix(),
+// 				IssuedAt:  time.Now().Unix(),
+// 				Issuer:    "bitop-admin",
+// 			},
+// 			UserUUID: uuid.New(), // test uuid
+// 			Scopes:   []string{}, // test data
+// 		})
+
+// 		if token == nil {
+// 			gCtx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("token is nil"))
+// 			return
+// 		}
+
+// 		strToken, err := token.SignedString([]byte(cfg.JWT.Token))
+// 		if err != nil {
+// 			gCtx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("cant create str token"))
+// 			return
+// 		}
+
+// 		gCtx.JSON(http.StatusOK, loginResp{
+// 			ExpiresIn:   cfg.JWT.ExpiresIn,
+// 			AccessToken: strToken,
+// 			TokenType:   "Bearer",
+// 		})
+// 	}
+
+// 	gCtx.AbortWithStatus(http.StatusForbidden) // отдаем 403 ответ в знак того что доступ запрещен
+// }
+
+// type registerReq struct {
+// 	Name string `json:"name"` // лучше назвать то же самое что login
+// 	Pass string `json:"pass"`
+// }
+
+// type registerResp struct {
+// 	Ok bool `json:"ok"`
+// }
+
+// func (a *App) Register(gCtx *gin.Context) {
+// 	req := &registerReq{}
+
+// 	err := json.NewDecoder(gCtx.Request.Body).Decode(req)
+// 	if err != nil {
+// 		gCtx.AbortWithError(http.StatusBadRequest, err)
+// 		return
+// 	}
+
+// 	if req.Pass == "" {
+// 		gCtx.AbortWithError(http.StatusBadRequest, fmt.Errorf("pass is empty"))
+// 		return
+// 	}
+
+// 	if req.Name == "" {
+// 		gCtx.AbortWithError(http.StatusBadRequest, fmt.Errorf("name is empty"))
+// 		return
+// 	}
+
+// 	err = a.repo.Register(&ds.User{
+// 		UUID: uuid.New(),
+// 		Role: role.Buyer,
+// 		Name: req.Name,
+// 		Pass: generateHashString(req.Pass), // пароли делаем в хешированном виде и далее будем сравнивать хеши, чтобы их не угнали с базой вместе
+// 	})
+// 	if err != nil {
+// 		gCtx.AbortWithError(http.StatusInternalServerError, err)
+// 		return
+// 	}
+
+// 	gCtx.JSON(http.StatusOK, &registerResp{
+// 		Ok: true,
+// 	})
+// }
+
+// func generateHashString(s string) string {
+// 	h := sha1.New()
+// 	h.Write([]byte(s))
+// 	return hex.EncodeToString(h.Sum(nil))
+// }
