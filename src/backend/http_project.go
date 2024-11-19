@@ -3,13 +3,24 @@ package backend
 import (
 	"errors"
 	"net/http"
-	database "rip/pkg/database"
+	"rip/pkg/database"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
+// GetProjectList godoc
+// @Summary Get list of projects
+// @Description Get a list of projects filtered by start date, end date, and status
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Param start_date query string false "Start Date in YYYY-MM-DD format"
+// @Param end_date query string false "End Date in YYYY-MM-DD format"
+// @Param status query string false "Status of the project"
+// @Success 200 {array} database.Project "List of projects"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /project [get]
 func (app *App) GetProjectList(c *gin.Context) {
 	startDateStr := c.Query("start_date") // формат: "YYYY-MM-DD"
 	endDateStr := c.Query("end_date")     // формат: "YYYY-MM-DD"
@@ -26,6 +37,19 @@ func (app *App) GetProjectList(c *gin.Context) {
 	})
 }
 
+// GetProjectByID godoc
+// @Summary Get details of a specific project by ID
+// @Description Get detailed information about a project, including associated files, by project ID
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Param id path int true "Project ID"
+// @Success 200 {object} database.Project "Detailed information about the project"
+// @Success 200 {array} database.File "List of files associated with the project"
+// @Failure 400 {object} ErrorResponse "Invalid project ID format"
+// @Failure 404 {object} ErrorResponse "Project or files not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /project/{id} [get]
 func (app *App) GetProjectByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -57,15 +81,24 @@ type UpdateProjectRequest struct {
 	Comment string          `json:"comment"`
 }
 
+// UpdateProject godoc
+// @Summary Update an existing project
+// @Description Update the status and comment of a project by its ID. The user must be the owner of the project to update it.
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Param id path int true "Project ID"
+// @Param request body UpdateProjectRequest true "Request payload for updating project"
+// @Success 200 {object} gin.H "Successfully updated project"
+// @Failure 400 {object} ErrorResponse "Invalid request format or status"
+// @Failure 401 {object} ErrorResponse "Unauthorized access"
+// @Failure 404 {object} ErrorResponse "Project not found or project does not belong to the user"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /project/{id} [put]
 func (app *App) UpdateProject(c *gin.Context) {
-	idAny, exists := c.Get("userID")
-	if !exists {
-		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"))
-		return
-	}
-	requestUserID, ok := idAny.(uuid.UUID)
-	if !ok {
-		handleError(c, http.StatusBadRequest, errors.New("[err] Unauthorized"), errors.New("userID is not of type *uuid.UUID"))
+	requestUserID, err := ExtractUserID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"), err)
 		return
 	}
 
@@ -119,22 +152,32 @@ type AddProjectRequest struct {
 	FileCodes map[uint]string `json:"file_codes"`
 }
 
+// SubmitProject godoc
+// @Summary Submit a project by updating files and status
+// @Description Submit a project by updating associated file codes and setting its status to "Created". The user must be the owner of the project to submit it.
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Param id path int true "Project ID"
+// @Param request body AddProjectRequest true "Request payload for submitting project"
+// @Success 200 {object} gin.H "Successfully submitted the project"
+// @Failure 400 {object} ErrorResponse "Invalid request format or project ID"
+// @Failure 401 {object} ErrorResponse "Unauthorized access"
+// @Failure 404 {object} ErrorResponse "Project not found or project does not belong to the user"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /project/{id}/submit [put]
 func (app *App) SubmitProject(c *gin.Context) {
-	idAny, exists := c.Get("userID")
-	if !exists {
-		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"))
-		return
-	}
-	requestUserID, ok := idAny.(uuid.UUID)
-	if !ok {
-		handleError(c, http.StatusBadRequest, errors.New("[err] Unauthorized"), errors.New("userID is not of type *uuid.UUID"))
+	requestUserID, err := ExtractUserID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"), err)
 		return
 	}
 
 	idStr := c.Param("id")
 	projectID, err := strconv.Atoi(idStr)
 	if err != nil {
-		handleError(c, http.StatusBadRequest, errors.New("[err] invalid id project"), err)
+		handleError(c, http.StatusBadRequest, errors.New("[err] invalid project ID format"), err)
+		return
 	}
 
 	var req AddProjectRequest
@@ -155,13 +198,13 @@ func (app *App) SubmitProject(c *gin.Context) {
 	}
 
 	if err := app.updateFilesCode(project.ID, req.FileCodes); err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] failed to update file"), err)
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update files"), err)
 		return
 	}
 
 	project.Status = database.Created
 	if err := app.updateProject(&project); err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update project"), err)
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update project status"), err)
 		return
 	}
 
@@ -176,22 +219,32 @@ type CompleteProjectRequest struct {
 	Comment string          `json:"comment"`
 }
 
+// CompleteProject godoc
+// @Summary Complete or reject a project with a status and comment
+// @Description Mark a project as completed or rejected, and provide an optional comment. The user must be the owner of the project to complete it. The project must have a formation date set to be completed.
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Param id path int true "Project ID"
+// @Param request body CompleteProjectRequest true "Request payload for completing or rejecting a project"
+// @Success 200 {object} gin.H "Successfully completed or rejected the project"
+// @Failure 400 {object} ErrorResponse "Invalid request format, project status, or missing formation date"
+// @Failure 401 {object} ErrorResponse "Unauthorized access"
+// @Failure 404 {object} ErrorResponse "Project not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /project/{id}/complete [put]
 func (app *App) CompleteProject(c *gin.Context) {
-	idAny, exists := c.Get("userID")
-	if !exists {
-		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"))
-		return
-	}
-	requestUserID, ok := idAny.(uuid.UUID)
-	if !ok {
-		handleError(c, http.StatusBadRequest, errors.New("[err] Unauthorized"), errors.New("userID is not of type *uuid.UUID"))
+	requestUserID, err := ExtractUserID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"), err)
 		return
 	}
 
 	idStr := c.Param("id")
 	projectID, err := strconv.Atoi(idStr)
 	if err != nil {
-		handleError(c, http.StatusBadRequest, errors.New("[err] invalid id project"), err)
+		handleError(c, http.StatusBadRequest, errors.New("[err] invalid project ID"), err)
+		return
 	}
 
 	var req CompleteProjectRequest
@@ -207,7 +260,7 @@ func (app *App) CompleteProject(c *gin.Context) {
 	}
 
 	if project.FormationTime == nil {
-		handleError(c, http.StatusBadRequest, errors.New("[err] project cannot be complete, formation date exists"))
+		handleError(c, http.StatusBadRequest, errors.New("[err] project cannot be completed, formation date is missing"))
 		return
 	}
 
@@ -239,15 +292,24 @@ type DeleteProjectRequest struct {
 	FileCodes map[uint]string `json:"file_codes"`
 }
 
+// DeleteProject godoc
+// @Summary Delete a project by updating its status to "deleted"
+// @Description Marks a project as deleted, but only if the project has no formation date. The user must be the owner of the project to delete it. Optionally, file codes associated with the project can be updated before deletion.
+// @Tags Projects
+// @Accept json
+// @Produce json
+// @Param id path int true "Project ID"
+// @Param request body DeleteProjectRequest true "Request payload for deleting a project"
+// @Success 200 {object} gin.H "Successfully deleted the project"
+// @Failure 400 {object} ErrorResponse "Invalid request format or project status, formation date exists"
+// @Failure 401 {object} ErrorResponse "Unauthorized access"
+// @Failure 404 {object} ErrorResponse "Project not found or project does not belong to the user"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /project/{id} [delete]
 func (app *App) DeleteProject(c *gin.Context) {
-	idAny, exists := c.Get("userID")
-	if !exists {
-		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"))
-		return
-	}
-	requestUserID, ok := idAny.(uuid.UUID)
-	if !ok {
-		handleError(c, http.StatusBadRequest, errors.New("[err] Unauthorized"), errors.New("userID is not of type *uuid.UUID"))
+	requestUserID, err := ExtractUserID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"), err)
 		return
 	}
 
@@ -284,7 +346,6 @@ func (app *App) DeleteProject(c *gin.Context) {
 		return
 	}
 
-	// Обновляем статус проекта на "удалён" (или статус 1)
 	project.Status = database.Deleted
 	if err := app.updateProject(&project); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update project"), err)

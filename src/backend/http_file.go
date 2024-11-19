@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type DeleteFileRequest struct {
@@ -13,15 +12,24 @@ type DeleteFileRequest struct {
 	LangID    uint `json:"lang_id" binding:"required"`
 }
 
+// DeleteFileFromProject godoc
+// @Summary Delete a file from a project
+// @Description Deletes a file from a project based on the provided project ID and language ID. Only the project owner can delete files from their project.
+// @Tags Files
+// @Accept json
+// @Produce json
+// @Param request body DeleteFileRequest true "File deletion request data"
+// @Success 200 {object} gin.H "File successfully deleted from project"
+// @Failure 400 {object} ErrorResponse "Invalid request format or missing fields"
+// @Failure 401 {object} ErrorResponse "Unauthorized"
+// @Failure 403 {object} ErrorResponse "User is not the project owner"
+// @Failure 404 {object} ErrorResponse "Project or file not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /file/delete [delete]
 func (app *App) DeleteFileFromProject(c *gin.Context) {
-	idAny, exists := c.Get("userID")
-	if !exists {
-		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"))
-		return
-	}
-	requestUserID, ok := idAny.(uuid.UUID)
-	if !ok {
-		handleError(c, http.StatusBadRequest, errors.New("[err] Unauthorized"), errors.New("userID is not of type *uuid.UUID"))
+	requestUserID, err := ExtractUserID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"), err)
 		return
 	}
 
@@ -67,15 +75,24 @@ type UpdateFileRequest struct {
 	Comment   string `json:"comment"`
 }
 
+// UpdateFileInProject godoc
+// @Summary Update a file in a project
+// @Description Updates the details of a file within a project. The user must be the owner of the project to update the file.
+// @Tags Files
+// @Accept json
+// @Produce json
+// @Param request body UpdateFileRequest true "File update request data"
+// @Success 200 {object} gin.H "File successfully updated in project"
+// @Failure 400 {object} ErrorResponse "Invalid request format or missing fields"
+// @Failure 401 {object} ErrorResponse "Unauthorized"
+// @Failure 403 {object} ErrorResponse "User is not the project owner"
+// @Failure 404 {object} ErrorResponse "Project or file not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /file/update [put]
 func (app *App) UpdateFileInProject(c *gin.Context) {
-	idAny, exists := c.Get("userID")
-	if !exists {
-		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"))
-		return
-	}
-	requestUserID, ok := idAny.(uuid.UUID)
-	if !ok {
-		handleError(c, http.StatusBadRequest, errors.New("[err] Unauthorized"), errors.New("userID is not of type *uuid.UUID"))
+	requestUserID, err := ExtractUserID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"), err)
 		return
 	}
 

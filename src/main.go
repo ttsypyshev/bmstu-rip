@@ -12,7 +12,7 @@ import (
 // @version 1.0
 // @description Bmstu Open IT Platform
 
-// @contact.name API Support
+// @contact.name ttsypyshev
 // @contact.url https://vk.com/ttsypyshev
 // @contact.email ttsypyshev01@gmail.com
 

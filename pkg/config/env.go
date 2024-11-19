@@ -65,3 +65,11 @@ func FromEnvRedis() (string, string, int, error) {
 
 	return addr, password, db, nil
 }
+
+func LoadSecret() (string, error) {
+	secret := os.Getenv("APP_SECRET")
+	if secret == "" {
+		return "", fmt.Errorf("missing APP_SECRET environment variable")
+	}
+	return secret, nil
+}

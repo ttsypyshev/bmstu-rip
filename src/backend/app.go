@@ -40,6 +40,12 @@ func Run() error {
 		return err
 	}
 
+	app.secret, err = config.LoadSecret()
+	if err != nil {
+		log.Fatalf("Error load secret phrase: %v", err)
+		return err
+	}
+
 	app.SetupRoutes(r)
 	if err := r.Run(); err != nil {
 		log.Fatalf("Server failed to start: %v", err)

@@ -1,10 +1,12 @@
 package backend
 
 import (
+	"errors"
 	"log"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -33,6 +35,11 @@ func extractObjectNameFromURL(url string) string {
 	return parts[len(parts)-1]
 }
 
+type ErrorResponse struct {
+	Message string `json:"message"`
+	Status  bool   `json:"code"`
+}
+
 // handleError обрабатывает и логирует ошибки, отправляет ответ
 func handleError(c *gin.Context, statusCode int, err error, additionalErrs ...error) {
 	if err == nil {
@@ -40,7 +47,7 @@ func handleError(c *gin.Context, statusCode int, err error, additionalErrs ...er
 		return
 	}
 
-	c.JSON(statusCode, gin.H{"status": false, "message": err.Error()})
+	c.JSON(statusCode, ErrorResponse{Status: false, Message: err.Error()})
 
 	var errorMessages strings.Builder
 	errorMessages.WriteString(err.Error())
@@ -68,4 +75,23 @@ func (app *App) GetFilteredLangs(query string) ([]DbLang, error) {
 	return app.getLangs(func(db *gorm.DB) *gorm.DB {
 		return db.Where("status = ?", true)
 	})
+}
+
+func ExtractUserID(c *gin.Context) (uuid.UUID, error) {
+	idAny, exists := c.Get("userID")
+	if !exists {
+		return uuid.UUID{}, errors.New("uuid missing")
+	}
+
+	idStr, ok := idAny.(string)
+	if !ok {
+		return uuid.UUID{}, errors.New("invalid ID type")
+	}
+
+	userID, err := uuid.Parse(idStr)
+	if err != nil {
+		return uuid.UUID{}, errors.New("invalid UUID format")
+	}
+
+	return userID, nil
 }

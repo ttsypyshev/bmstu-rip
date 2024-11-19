@@ -6,18 +6,25 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
+// GetServiceList godoc
+// @Summary Get a list of filtered languages and related project information
+// @Description Retrieves a list of languages filtered by the specified query and details of the user's most recent draft project, including its ID and count.
+// @Tags Services
+// @Accept json
+// @Produce json
+// @Param langname query string false "Language name to filter the list of services"
+// @Success 200 {object} gin.H "List of filtered languages, draft project ID, and project count"
+// @Failure 400 {object} ErrorResponse "Invalid request format"
+// @Failure 401 {object} ErrorResponse "Unauthorized access"
+// @Failure 404 {object} ErrorResponse "Draft project not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /info [get]
 func (app *App) GetServiceList(c *gin.Context) {
-	idAny, exists := c.Get("userID")
-	if !exists {
-		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"))
-		return
-	}
-	requestUserID, ok := idAny.(uuid.UUID)
-	if !ok {
-		handleError(c, http.StatusBadRequest, errors.New("[err] Unauthorized"), errors.New("userID is not of type *uuid.UUID"))
+	requestUserID, err := ExtractUserID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"), err)
 		return
 	}
 
@@ -30,7 +37,7 @@ func (app *App) GetServiceList(c *gin.Context) {
 
 	projectID, err := findLastDraft(app, requestUserID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] unable to find the last draft project for the user"), err)
+		handleError(c, http.StatusNotFound, errors.New("[err] unable to find the last draft project for the user"), err)
 		return
 	}
 
@@ -47,6 +54,18 @@ func (app *App) GetServiceList(c *gin.Context) {
 	})
 }
 
+// GetServiceByID godoc
+// @Summary Get details of a language by its ID
+// @Description Retrieves the details of a language based on the provided language ID.
+// @Tags Services
+// @Accept json
+// @Produce json
+// @Param id path int true "Language ID"
+// @Success 200 {object} gin.H "Language details"
+// @Failure 400 {object} ErrorResponse "Invalid language ID format"
+// @Failure 404 {object} ErrorResponse "Language not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /info/{id} [get]
 func (app *App) GetServiceByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -76,6 +95,17 @@ type CreateServiceRequest struct {
 	List             map[string]string `json:"list"`
 }
 
+// CreateService godoc
+// @Summary Create a new language service
+// @Description Creates a new language service with the provided details and saves it to the database.
+// @Tags Services
+// @Accept json
+// @Produce json
+// @Param body body CreateServiceRequest true "Service creation details"
+// @Success 201 {object} gin.H "Service successfully created"
+// @Failure 400 {object} ErrorResponse "Invalid input data"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /info [post]
 func (app *App) CreateService(c *gin.Context) {
 	var input CreateServiceRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -115,6 +145,19 @@ type UpdateServiceRequest struct {
 	List             map[string]string `json:"list"`
 }
 
+// UpdateService godoc
+// @Summary Update an existing language service
+// @Description Updates the details of an existing language service based on the provided ID and request data.
+// @Tags Services
+// @Accept json
+// @Produce json
+// @Param id path int true "Service ID"
+// @Param body body UpdateServiceRequest true "Service update details"
+// @Success 200 {object} gin.H "Service successfully updated"
+// @Failure 400 {object} ErrorResponse "Invalid input data"
+// @Failure 404 {object} ErrorResponse "Service not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /info/{id} [put]
 func (app *App) UpdateService(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -168,6 +211,19 @@ func (app *App) UpdateService(c *gin.Context) {
 	})
 }
 
+// UpdateServiceImage godoc
+// @Summary Update the image of an existing language service
+// @Description Updates the image of an existing language service identified by the provided service ID.
+// @Tags Services
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path int true "Service ID"
+// @Param image formData file true "Service image file"
+// @Success 200 {object} gin.H "Service image updated successfully"
+// @Failure 400 {object} ErrorResponse "Invalid service ID or missing image file"
+// @Failure 404 {object} ErrorResponse "Service not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /info/{id} [post]
 func (app *App) UpdateServiceImage(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -190,7 +246,7 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 
 	imageURL, err := app.uploadImageToMinIO(file)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err, nil)
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to upload image to MinIO"), err)
 		return
 	}
 
@@ -208,11 +264,23 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 	})
 }
 
+// DeleteService godoc
+// @Summary Delete a language service by ID
+// @Description Deletes a language service and its associated image from MinIO. If the service is not found, an error will be returned.
+// @Tags Services
+// @Accept json
+// @Produce json
+// @Param id path int true "Service ID"
+// @Success 200 {object} gin.H "Service deleted successfully"
+// @Failure 400 {object} ErrorResponse "Invalid service ID format"
+// @Failure 404 {object} ErrorResponse "Service not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /info/{id} [delete]
 func (app *App) DeleteService(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		handleError(c, http.StatusBadRequest, errors.New("[err] invalid service ID"), err)
+		handleError(c, http.StatusBadRequest, errors.New("[err] invalid service ID format"), err)
 		return
 	}
 
@@ -223,12 +291,12 @@ func (app *App) DeleteService(c *gin.Context) {
 	}
 
 	if err := app.deleteImageFromMinIO(service.ImgLink); err != nil {
-		handleError(c, http.StatusInternalServerError, err, nil)
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete image from MinIO"), err)
 		return
 	}
 
 	if err := app.deleteLang(uint(id)); err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete service"), err)
+		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete service from database"), err)
 		return
 	}
 
@@ -242,15 +310,22 @@ type AddServiceRequest struct {
 	IDLang uint `json:"id_lang"`
 }
 
+// AddServiceToDraft godoc
+// @Summary Add a service to a project draft
+// @Description Adds a service to a draft project. This endpoint expects a service ID and creates a new project for the user, adding the specified service to the draft.
+// @Tags Services
+// @Accept json
+// @Produce json
+// @Param request body AddServiceRequest true "Service request data"
+// @Success 200 {object} gin.H "Service successfully added to draft"
+// @Failure 400 {object} ErrorResponse "Invalid request format or missing fields"
+// @Failure 401 {object} ErrorResponse "Unauthorized"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /info/draft [post]
 func (app *App) AddServiceToDraft(c *gin.Context) {
-	idAny, exists := c.Get("userID")
-	if !exists {
-		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"))
-		return
-	}
-	requestUserID, ok := idAny.(uuid.UUID)
-	if !ok {
-		handleError(c, http.StatusBadRequest, errors.New("[err] Unauthorized"), errors.New("userID is not of type *uuid.UUID"))
+	requestUserID, err := ExtractUserID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"), err)
 		return
 	}
 

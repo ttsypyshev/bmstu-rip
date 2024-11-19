@@ -7,6 +7,12 @@ BUILD_DIR = bin
 SRC_DIR = src
 EXECUTABLE = $(BUILD_DIR)/$(PROCESS_NAME)
 
+# Генерация Swagger-документации
+swag:
+	@echo "Генерация Swagger-документации..."
+	@swag init --dir=$(SRC_DIR) --parseDependency --parseInternal --output ./doc/swagger
+	@echo "Swagger-документация успешно сгенерирована."
+
 # Убийство процесса, если нужно
 kill_process:
 	@echo "Поиск процесса '${PROCESS_NAME}' на порту ${PORT}..."
@@ -19,17 +25,17 @@ kill_process:
 	fi
 
 # Сборка Go-программы
-build:
+build: swag
 	@echo "Сборка Go-программы..."
 	@go build -o $(EXECUTABLE) $(SRC_DIR)/main.go
 	@echo "Сборка завершена. Программа сохранена в $(EXECUTABLE)."
 
 # Запуск Go-программы
-run: build kill_process
+run: kill_process build swag
 	@echo "Запуск Go-программы..."
 	@GIN_MODE=release ./$(EXECUTABLE)
 
 # Запуск Go-программы
-debug: build kill_process
+debug: kill_process
 	@echo "Запуск Go-программы (в debug режиме)..."
 	@go run $(SRC_DIR)/main.go

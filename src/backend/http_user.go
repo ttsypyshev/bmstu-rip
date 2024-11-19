@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type RegisterUserRequest struct {
@@ -18,6 +17,17 @@ type RegisterUserRequest struct {
 	Password string `json:"password"`
 }
 
+// RegisterUser godoc
+// @Summary Registers a new user
+// @Description This endpoint registers a new user by accepting a JSON payload with the user's details (name, email, login, password).
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param request body RegisterUserRequest true "User registration data"
+// @Success 201 {object} gin.H "User registered successfully"
+// @Failure 400 {object} ErrorResponse "Invalid request format or user registration failed"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /user/register [post]
 func (app *App) RegisterUser(c *gin.Context) {
 	var req RegisterUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -43,15 +53,23 @@ type UpdateUserProfileRequest struct {
 	Name     string `json:"name"`
 }
 
+// UpdateUserProfile godoc
+// @Summary Updates user profile
+// @Description This endpoint allows users to update their profile details (name, email, password).
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param request body UpdateUserProfileRequest true "User profile update data"
+// @Success 200 {object} gin.H "User profile updated successfully"
+// @Failure 400 {object} ErrorResponse "Invalid request format or update failed"
+// @Failure 401 {object} ErrorResponse "Unauthorized"
+// @Failure 404 {object} ErrorResponse "User not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /user/update [put]
 func (app *App) UpdateUserProfile(c *gin.Context) {
-	idAny, exists := c.Get("userID")
-	if !exists {
-		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"))
-		return
-	}
-	requestUserID, ok := idAny.(uuid.UUID)
-	if !ok {
-		handleError(c, http.StatusBadRequest, errors.New("[err] Unauthorized"), errors.New("userID is not of type *uuid.UUID"))
+	requestUserID, err := ExtractUserID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, errors.New("[err] Unauthorized"), err)
 		return
 	}
 
@@ -89,10 +107,27 @@ func (app *App) UpdateUserProfile(c *gin.Context) {
 }
 
 type UserLoginRequest struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
+	Login    string `json:"login" example:"user@example.com"`
+	Password string `json:"password" example:"securepassword"`
 }
 
+type UserLoginResponse struct {
+	ExpiresIn   time.Duration `json:"expires_in" example:"86400"`
+	AccessToken string        `json:"access_token" example:"JWT_TOKEN"`
+	TokenType   string        `json:"token_type" example:"Bearer"`
+}
+
+// UserLogin godoc
+// @Summary User login
+// @Description Authenticates the user and returns a JWT token on successful login.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param request body UserLoginRequest true "User login credentials"
+// @Success 200 {object} UserLoginResponse "User login successful and JWT token generated"
+// @Failure 400 {object} ErrorResponse "Invalid login or password"
+// @Failure 500 {object} ErrorResponse "Failed to generate or save session"
+// @Router /user/login [post]
 func (app *App) UserLogin(c *gin.Context) {
 	var req UserLoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -120,13 +155,23 @@ func (app *App) UserLogin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"ExpiresIn":   expiration,
-		"AccessToken": token,
-		"TokenType":   "Bearer",
+	c.JSON(http.StatusOK, UserLoginResponse{
+		ExpiresIn:   expiration,
+		AccessToken: token,
+		TokenType:   "Bearer",
 	})
 }
 
+// UserLogout godoc
+// @Summary User logout
+// @Description Logs the user out by deleting the session and clearing the authentication token from the cookie.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Success 200 {object} gin.H "User logged out successfully"
+// @Failure 400 {object} ErrorResponse "Failed to clear session"
+// @Failure 401 {object} ErrorResponse "Unauthorized: User not authenticated"
+// @Router /user/logout [post]
 func (app *App) UserLogout(c *gin.Context) {
 	idAny, exists := c.Get("userID")
 	if !exists {
@@ -149,5 +194,8 @@ func (app *App) UserLogout(c *gin.Context) {
 	// Удаление токена из cookie
 	c.SetCookie("auth_token", "", -1, "/", "", false, true)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Logout successful",
+		"status":  true,
+	})
 }

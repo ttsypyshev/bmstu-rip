@@ -1,0 +1,1475 @@
+{
+    "schemes": [
+        "https",
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Bmstu Open IT Platform",
+        "title": "BITOP",
+        "contact": {
+            "name": "API Support",
+            "url": "https://vk.com/ttsypyshev",
+            "email": "ttsypyshev01@gmail.com"
+        },
+        "license": {
+            "name": "AS IS (NO WARRANTY)"
+        },
+        "version": "1.0"
+    },
+    "host": "127.0.0.1",
+    "basePath": "/",
+    "paths": {
+        "/file/delete": {
+            "delete": {
+                "description": "Deletes a file from a project based on the provided project ID and language ID. Only the project owner can delete files from their project.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Delete a file from a project",
+                "parameters": [
+                    {
+                        "description": "File deletion request data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.DeleteFileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File successfully deleted from project",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or missing fields",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "User is not the project owner",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Project or file not found",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/file/update": {
+            "put": {
+                "description": "Updates the details of a file within a project. The user must be the owner of the project to update the file.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Update a file in a project",
+                "parameters": [
+                    {
+                        "description": "File update request data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.UpdateFileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File successfully updated in project",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or missing fields",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "User is not the project owner",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Project or file not found",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/info": {
+            "get": {
+                "description": "Retrieves a list of languages filtered by the specified query and details of the user's most recent draft project, including its ID and count.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Get a list of filtered languages and related project information",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Language name to filter the list of services",
+                        "name": "langname",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of filtered languages, draft project ID, and project count",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Draft project not found",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new language service with the provided details and saves it to the database.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Create a new language service",
+                "parameters": [
+                    {
+                        "description": "Service creation details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.CreateServiceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Service successfully created",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/info/draft": {
+            "post": {
+                "description": "Adds a service to a draft project. This endpoint expects a service ID and creates a new project for the user, adding the specified service to the draft.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Add a service to a project draft",
+                "parameters": [
+                    {
+                        "description": "Service request data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.AddServiceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Service successfully added to draft",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or missing fields",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/info/{id}": {
+            "get": {
+                "description": "Retrieves the details of a language based on the provided language ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Get details of a language by its ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Language ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Language details",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid language ID format",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Language not found",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates the details of an existing language service based on the provided ID and request data.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Update an existing language service",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Service update details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.UpdateServiceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Service successfully updated",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Service not found",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Updates the image of an existing language service identified by the provided service ID.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Update the image of an existing language service",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Service image file",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Service image updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid service ID or missing image file",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Service not found",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a language service and its associated image from MinIO. If the service is not found, an error will be returned.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Delete a language service by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Service deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid service ID format",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Service not found",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/project": {
+            "get": {
+                "description": "Get a list of projects filtered by start date, end date, and status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Get list of projects",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start Date in YYYY-MM-DD format",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date in YYYY-MM-DD format",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Status of the project",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of projects",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/database.Project"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/project/{id}": {
+            "get": {
+                "description": "Get detailed information about a project, including associated files, by project ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Get details of a specific project by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of files associated with the project",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/database.File"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid project ID format",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Project or files not found",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update the status and comment of a project by its ID. The user must be the owner of the project to update it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Update an existing project",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request payload for updating project",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.UpdateProjectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated project",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or status",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found or project does not belong to the user",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Marks a project as deleted, but only if the project has no formation date. The user must be the owner of the project to delete it. Optionally, file codes associated with the project can be updated before deletion.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Delete a project by updating its status to \"deleted\"",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request payload for deleting a project",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.DeleteProjectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully deleted the project",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or project status, formation date exists",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found or project does not belong to the user",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/project/{id}/complete": {
+            "put": {
+                "description": "Mark a project as completed or rejected, and provide an optional comment. The user must be the owner of the project to complete it. The project must have a formation date set to be completed.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Complete or reject a project with a status and comment",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request payload for completing or rejecting a project",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.CompleteProjectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully completed or rejected the project",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format, project status, or missing formation date",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/project/{id}/submit": {
+            "put": {
+                "description": "Submit a project by updating associated file codes and setting its status to \"Created\". The user must be the owner of the project to submit it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Submit a project by updating files and status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request payload for submitting project",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.AddProjectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully submitted the project",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or project ID",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found or project does not belong to the user",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "description": "Authenticates the user and returns a JWT token on successful login.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "User login",
+                "parameters": [
+                    {
+                        "description": "User login credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.UserLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User login successful and JWT token generated",
+                        "schema": {
+                            "$ref": "#/definitions/backend.UserLoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid login or password",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to generate or save session",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/logout": {
+            "post": {
+                "description": "Logs the user out by deleting the session and clearing the authentication token from the cookie.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "User logout",
+                "responses": {
+                    "200": {
+                        "description": "User logged out successfully",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed to clear session",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: User not authenticated",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/register": {
+            "post": {
+                "description": "This endpoint registers a new user by accepting a JSON payload with the user's details (name, email, login, password).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Registers a new user",
+                "parameters": [
+                    {
+                        "description": "User registration data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.RegisterUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or user registration failed",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/update": {
+            "put": {
+                "description": "This endpoint allows users to update their profile details (name, email, password).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Updates user profile",
+                "parameters": [
+                    {
+                        "description": "User profile update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend.UpdateUserProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User profile updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or update failed",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/backend.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "backend.AddProjectRequest": {
+            "type": "object",
+            "properties": {
+                "file_codes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "backend.AddServiceRequest": {
+            "type": "object",
+            "properties": {
+                "id_lang": {
+                    "type": "integer"
+                }
+            }
+        },
+        "backend.CompleteProjectRequest": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/database.Status"
+                }
+            }
+        },
+        "backend.CreateServiceRequest": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "list": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "short_description": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend.DeleteFileRequest": {
+            "type": "object",
+            "required": [
+                "lang_id",
+                "project_id"
+            ],
+            "properties": {
+                "lang_id": {
+                    "type": "integer"
+                },
+                "project_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "backend.DeleteProjectRequest": {
+            "type": "object",
+            "properties": {
+                "file_codes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "backend.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend.RegisterUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend.UpdateFileRequest": {
+            "type": "object",
+            "required": [
+                "lang_id",
+                "project_id"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "lang_id": {
+                    "type": "integer"
+                },
+                "project_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "backend.UpdateProjectRequest": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/database.Status"
+                }
+            }
+        },
+        "backend.UpdateServiceRequest": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "list": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "short_description": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend.UpdateUserProfileRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend.UserLoginRequest": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "securepassword"
+                }
+            }
+        },
+        "backend.UserLoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "JWT_TOKEN"
+                },
+                "expires_in": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/time.Duration"
+                        }
+                    ],
+                    "example": 86400
+                },
+                "token_type": {
+                    "type": "string",
+                    "example": "Bearer"
+                }
+            }
+        },
+        "database.File": {
+            "type": "object",
+            "properties": {
+                "Lang": {
+                    "$ref": "#/definitions/database.Lang"
+                },
+                "autoCheck": {
+                    "type": "integer"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "fileName": {
+                    "type": "string"
+                },
+                "fileSize": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "langID": {
+                    "type": "integer"
+                },
+                "projectID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "database.JSONB": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "database.Lang": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imgLink": {
+                    "type": "string"
+                },
+                "list": {
+                    "$ref": "#/definitions/database.JSONB"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "shortDescription": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "string"
+                }
+            }
+        },
+        "database.Project": {
+            "description": "Project represents a project in the system",
+            "type": "object",
+            "properties": {
+                "Moderator": {
+                    "$ref": "#/definitions/database.User"
+                },
+                "User": {
+                    "$ref": "#/definitions/database.User"
+                },
+                "completionTime": {
+                    "type": "string"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "creationTime": {
+                    "type": "string"
+                },
+                "formationTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "moderatorComment": {
+                    "type": "string"
+                },
+                "moderatorID": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/database.Status"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "database.Role": {
+            "type": "string",
+            "enum": [
+                "admin",
+                "student",
+                "none"
+            ],
+            "x-enum-varnames": [
+                "Admin",
+                "Student",
+                "None"
+            ]
+        },
+        "database.Status": {
+            "type": "string",
+            "enum": [
+                "draft",
+                "deleted",
+                "created",
+                "completed",
+                "rejected"
+            ],
+            "x-enum-varnames": [
+                "Draft",
+                "Deleted",
+                "Created",
+                "Completed",
+                "Rejected"
+            ]
+        },
+        "database.User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/database.Role"
+                }
+            }
+        },
+        "gin.H": {
+            "type": "object",
+            "additionalProperties": {}
+        },
+        "time.Duration": {
+            "type": "integer",
+            "enum": [
+                -9223372036854775808,
+                9223372036854775807,
+                1,
+                1000,
+                1000000,
+                1000000000,
+                60000000000,
+                3600000000000
+            ],
+            "x-enum-varnames": [
+                "minDuration",
+                "maxDuration",
+                "Nanosecond",
+                "Microsecond",
+                "Millisecond",
+                "Second",
+                "Minute",
+                "Hour"
+            ]
+        }
+    }
+}

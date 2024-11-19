@@ -31,6 +31,7 @@ type Lang struct {
 }
 
 // Project представляет заявку
+// @Description Project represents a project in the system
 type Project struct {
 	ID               uint      `gorm:"primaryKey;autoIncrement"`
 	UserID           uuid.UUID `gorm:"type:uuid;not null"`
