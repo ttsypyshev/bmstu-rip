@@ -1,10 +1,14 @@
 package backend
 
 import (
+	"errors"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -70,29 +74,35 @@ func (app *App) GetFilteredLangs(query string) ([]DbLang, error) {
 	})
 }
 
-// // Генерация JWT-токена (пример с использованием "github.com/golang-jwt/jwt/v4")
-// func generateJWTToken(userID uint) (string, error) {
-// 	// Определяем стандартные параметры токена
-// 	claims := jwt.MapClaims{
-// 		"user_id": userID,
-// 		"exp":     time.Now().Add(time.Hour * 72).Unix(), // Время жизни токена — 72 часа
-// 	}
+func GenerateJWT(userID uuid.UUID, role string, secret string) (string, error) {
+	claims := jwt.MapClaims{
+		"user_id": userID.String(),
+		"role":    role,
+		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Токен истекает через 24 часа
+	}
 
-// 	// Создаем токен с использованием секретного ключа
-// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-// 	secretKey := []byte("your-secret-key") // Замените на более безопасный способ хранения ключа
-// 	return token.SignedString(secretKey)
-// }
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
+}
 
-// func (app *App) blockToken(tokenString string) error {
-// 	// В простом варианте — добавить токен в базу заблокированных токенов с временем истечения
-// 	// Либо использовать Redis или другую систему для временного хранения токенов
-// 	expirationTime := time.Now().Add(72 * time.Hour) // Токен будет храниться до истечения срока его действия
+type JWTClaims struct {
+	UserID string `json:"user_id"`
+	Role   string `json:"role"`
+	jwt.StandardClaims
+}
 
-// 	blockedToken := &database.BlockedToken{
-// 		Token:          tokenString,
-// 		ExpirationTime: expirationTime,
-// 	}
+func ValidateJWT(tokenString, secret string) (*JWTClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
 
-// 	return app.db.Create(blockedToken).Error
-// }
+	claims, ok := token.Claims.(*JWTClaims)
+	if !ok || !token.Valid || claims.ExpiresAt < time.Now().Unix() {
+		return nil, errors.New("invalid or expired token")
+	}
+
+	return claims, nil
+}
