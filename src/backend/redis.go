@@ -5,9 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"rip/pkg/config"
 	"time"
-
-	env "rip/pkg/settings"
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
@@ -15,7 +14,7 @@ import (
 
 // InitializeRedis инициализирует клиент Redis
 func InitializeRedis() (*redis.Client, error) {
-	addr, password, db, err := env.FromEnvRedis()
+	addr, password, db, err := config.FromEnvRedis()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Redis configuration from environment: %v", err)
 	}

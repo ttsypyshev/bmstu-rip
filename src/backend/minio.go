@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"log"
 	"mime/multipart"
-
-	env "rip/pkg/settings"
+	"rip/pkg/config"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -15,7 +14,7 @@ import (
 var bucketName string = "code-inspector"
 
 func InitializeMinIO() (*minio.Client, error) {
-	endpoint, accessKey, secretKey, useSSL, err := env.FromEnvMinIO()
+	endpoint, accessKey, secretKey, useSSL, err := config.FromEnvMinIO()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get MinIO configuration from environment: %v", err)
 	}

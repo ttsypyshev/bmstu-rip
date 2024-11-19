@@ -3,8 +3,8 @@ package backend
 import (
 	"errors"
 	"fmt"
-	database "rip/pkg/database"
-	env "rip/pkg/settings"
+	"rip/pkg/config"
+	"rip/pkg/database"
 	"strings"
 	"time"
 
@@ -27,7 +27,7 @@ type Db struct {
 
 func Migrate() error {
 	_ = godotenv.Load()
-	db, err := gorm.Open(postgres.Open(env.FromEnvDB()), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(config.FromEnvDB()), &gorm.Config{})
 	if err != nil {
 		return err
 	}

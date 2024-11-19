@@ -7,7 +7,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
 
-	env "rip/pkg/settings"
+	"rip/pkg/config"
 )
 
 type App struct {
@@ -22,7 +22,7 @@ func Run() error {
 
 	r := gin.Default()
 
-	app, err := NewDB(env.FromEnvDB())
+	app, err := NewDB(config.FromEnvDB())
 	if err != nil {
 		log.Fatalf("Error initializing the database: %v", err)
 		return err
