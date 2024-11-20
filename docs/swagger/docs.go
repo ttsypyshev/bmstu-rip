@@ -249,7 +249,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/info/draft": {
+        "/info/add-service": {
             "post": {
                 "description": "Adds a service to a draft project. This endpoint expects a service ID and creates a new project for the user, adding the specified service to the draft.",
                 "consumes": [

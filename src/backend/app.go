@@ -9,7 +9,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	_ "rip/doc/swagger"
+	_ "rip/docs/swagger"
 	"rip/pkg/config"
 )
 

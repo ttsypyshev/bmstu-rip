@@ -21,7 +21,11 @@ make run
 
 2. **Браузер базы данных**  
    Для доступа к инструменту просмотра базы данных перейдите по ссылке (нужно создать сервер и таблицы):  
-   [http://localhost:15432/browser/](http://localhost:15432/browser/)  
+   [http://localhost:15432/browser/](http://localhost:15432/browser/) 
+   
+3. **Изучение методов api (swagger)**  
+   Для просмотра методов api и их request, response, curl, example используйте следующую сслыку:  
+   [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) 
 
 
 ## Настройка базы данных

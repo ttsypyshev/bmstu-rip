@@ -39,7 +39,7 @@ func (app *App) DeleteFileFromProject(c *gin.Context) {
 		return
 	}
 
-	project, err := app.getProjectByID(req.ProjectID)
+	project, err := app.getProjectFirst(req.ProjectID)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
 		return
@@ -102,7 +102,7 @@ func (app *App) UpdateFileInProject(c *gin.Context) {
 		return
 	}
 
-	project, err := app.getProjectByID(req.ProjectID)
+	project, err := app.getProjectFirst(req.ProjectID)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
 		return

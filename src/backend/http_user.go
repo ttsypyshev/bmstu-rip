@@ -79,7 +79,7 @@ func (app *App) UpdateUserProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := app.getUserByID(requestUserID)
+	user, err := app.getUserFirst(requestUserID)
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] user not found"), err)
 		return

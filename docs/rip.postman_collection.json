@@ -200,6 +200,16 @@
 				{
 					"name": "CreateService",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzIxNjE0MjcsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOiJiNTE2NTAzNS1iZWU3LTRkZTEtODQ1Ny01ODllMjIxZTljMmUifQ.5RTOaCyBcJ4N2xRth64UMC-HIkNQYQJwYiFTS8GvW3U",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -228,6 +238,16 @@
 				{
 					"name": "UpdateService",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzIxNjE0ODAsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOiJiNTE2NTAzNS1iZWU3LTRkZTEtODQ1Ny01ODllMjIxZTljMmUifQ.I447AlQmq3dtnTXhHjNh_AF46XtZ3_67EbgdVexz12U",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [],
 						"body": {
@@ -257,6 +277,16 @@
 				{
 					"name": "UpdateServiceImage",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzIxNjE0ODAsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOiJiNTE2NTAzNS1iZWU3LTRkZTEtODQ1Ny01ODllMjIxZTljMmUifQ.I447AlQmq3dtnTXhHjNh_AF46XtZ3_67EbgdVexz12U",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -287,6 +317,16 @@
 				{
 					"name": "DeleteService",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzIxNjE0ODAsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOiJiNTE2NTAzNS1iZWU3LTRkZTEtODQ1Ny01ODllMjIxZTljMmUifQ.I447AlQmq3dtnTXhHjNh_AF46XtZ3_67EbgdVexz12U",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -311,7 +351,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"id_lang\":3}",
+							"raw": "{\"id_lang\":1}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -344,7 +384,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/project?start_date=2023-01-01&end_date=2024-12-31&status=rejected",
+							"raw": "http://localhost:8080/project",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -356,15 +396,18 @@
 							"query": [
 								{
 									"key": "start_date",
-									"value": "2023-01-01"
+									"value": "2023-01-01",
+									"disabled": true
 								},
 								{
 									"key": "end_date",
-									"value": "2024-12-31"
+									"value": "2024-12-31",
+									"disabled": true
 								},
 								{
 									"key": "status",
-									"value": "rejected"
+									"value": "rejected",
+									"disabled": true
 								}
 							]
 						}
@@ -453,6 +496,16 @@
 				{
 					"name": "CompleteProject",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzIxNjE0ODAsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOiJiNTE2NTAzNS1iZWU3LTRkZTEtODQ1Ny01ODllMjIxZTljMmUifQ.I447AlQmq3dtnTXhHjNh_AF46XtZ3_67EbgdVexz12U",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [],
 						"body": {
@@ -609,6 +662,16 @@
 				{
 					"name": "UpdateUserProfile",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzIxNjIxMzYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjYzYzc5MjU5LTYzMjEtNDEwZS05NGMyLWM3NjI4ZDE3MDkxMCJ9.XxFgd8noYjE6wQg5WpVQzNalySPEbO776tPnPSgLaLo",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [],
 						"body": {
@@ -642,7 +705,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// {\n//   \"login\": \"admin1\",\n//   \"password\": \"password123\"\n// }\n\n{\n  \"login\": \"user1\",\n  \"password\": \"userPass123\"\n}\n",
+							"raw": "// {\n//   \"login\": \"admin1\",\n//   \"password\": \"password123\"\n// }\n\n{\n  \"login\": \"user1\",\n  \"password\": \"userPass123\"\n}\n\n// {\n//   \"login\": \"johndoe1\",\n//   \"password\": \"securepassword123\"\n// }",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -763,10 +826,17 @@
 					"name": "UserLogout",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzIxMjAxMjQsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6ImZhNzk3MjU4LWJmZjItNGY2Ny04NjI3LTE3MzZiYThkMTI2NCJ9.FDbnTcWrmuYvEc8wg1AxblVMZ_gaXnu2nTIIJC_ML9A",
+								"type": "text",
+								"disabled": true
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "// {\n//   \"login\": \"admin1\"\n// }\n\n{\n  \"login\": \"user1\"\n}\n",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -786,104 +856,41 @@
 							]
 						}
 					},
-					"response": [
-						{
-							"name": "AdminLogout",
-							"originalRequest": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"login\": \"admin1\"\n}\n\n// {\n//   \"login\": \"user1\"\n// }\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8080/user/logout",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"user",
-										"logout"
-									]
-								}
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json; charset=utf-8"
-								},
-								{
-									"key": "Date",
-									"value": "Sat, 16 Nov 2024 11:39:39 GMT"
-								},
-								{
-									"key": "Content-Length",
-									"value": "60"
-								}
-							],
-							"cookie": [],
-							"body": "{\n    \"message\": \"User has successfully logged out\",\n    \"status\": true\n}"
-						},
-						{
-							"name": "UserLogout",
-							"originalRequest": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "// {\n//   \"login\": \"admin1\"\n// }\n\n{\n  \"login\": \"user1\"\n}\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8080/user/logout",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"user",
-										"logout"
-									]
-								}
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json; charset=utf-8"
-								},
-								{
-									"key": "Date",
-									"value": "Sat, 16 Nov 2024 11:40:10 GMT"
-								},
-								{
-									"key": "Content-Length",
-									"value": "60"
-								}
-							],
-							"cookie": [],
-							"body": "{\n    \"message\": \"User has successfully logged out\",\n    \"status\": true\n}"
-						}
-					]
+					"response": []
 				}
 			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzIxNjM4MDEsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjVlMjc5ZWQxLTAxNmUtNDI5OC05YWVkLTg5OTlkNDFhNTUyMSJ9.SE59BYkp60CI-KmchkQ7d8Y6jJ-rtKPBnIniR_4a95Y",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }

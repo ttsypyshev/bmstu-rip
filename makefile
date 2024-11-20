@@ -10,7 +10,7 @@ EXECUTABLE = $(BUILD_DIR)/$(PROCESS_NAME)
 # Генерация Swagger-документации
 swag:
 	@echo "Генерация Swagger-документации..."
-	@swag init --dir=$(SRC_DIR) --parseDependency --parseInternal --output ./doc/swagger
+	@swag init --dir=$(SRC_DIR) --parseDependency --parseInternal --output ./docs/swagger
 	@echo "Swagger-документация успешно сгенерирована."
 
 # Убийство процесса, если нужно

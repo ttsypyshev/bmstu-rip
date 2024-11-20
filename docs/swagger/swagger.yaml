@@ -636,7 +636,7 @@ paths:
       summary: Update an existing language service
       tags:
       - Services
-  /info/draft:
+  /info/add-service:
     post:
       consumes:
       - application/json

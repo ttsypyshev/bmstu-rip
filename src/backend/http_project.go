@@ -58,7 +58,7 @@ func (app *App) GetProjectByID(c *gin.Context) {
 		return
 	}
 
-	project, err := app.getProjectByID(uint(id))
+	project, err := app.getProjectFirst(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
 		return
@@ -115,7 +115,7 @@ func (app *App) UpdateProject(c *gin.Context) {
 		return
 	}
 
-	project, err := app.getProjectByID(uint(id))
+	project, err := app.getProjectFirst(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
 		return
@@ -186,7 +186,7 @@ func (app *App) SubmitProject(c *gin.Context) {
 		return
 	}
 
-	project, err := app.getProjectByID(uint(projectID))
+	project, err := app.getProjectFirst(uint(projectID))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
 		return
@@ -253,7 +253,7 @@ func (app *App) CompleteProject(c *gin.Context) {
 		return
 	}
 
-	project, err := app.getProjectByID(uint(projectID))
+	project, err := app.getProjectFirst(uint(projectID))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
 		return
@@ -325,7 +325,7 @@ func (app *App) DeleteProject(c *gin.Context) {
 		return
 	}
 
-	project, err := app.getProjectByID(uint(projectID))
+	project, err := app.getProjectFirst(uint(projectID))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] project not found"), err)
 		return

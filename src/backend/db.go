@@ -92,11 +92,12 @@ func (app *App) getFiles(filterFunc ...func(db *gorm.DB) *gorm.DB) ([]DbFile, er
 	return getEntities[DbFile](app, filterFunc...)
 }
 
-// Получение сущностей по ID
-func getByID[T any](app *App, id uint) (T, error) {
+func getFirst[T any](app *App, ids ...any) (T, error) {
 	var item T
 
-	err := app.db.db.First(&item, "id = ?", id).Error
+	query := app.db.db.Where("id IN (?)", ids)
+
+	err := query.First(&item).Error
 	if err != nil {
 		return item, err
 	}
@@ -104,20 +105,20 @@ func getByID[T any](app *App, id uint) (T, error) {
 	return item, nil
 }
 
-func (app *App) getLangByID(langID uint) (DbLang, error) {
-	return getByID[DbLang](app, langID)
+func (app *App) getLangFirst(langID uint) (DbLang, error) {
+	return getFirst[DbLang](app, langID)
 }
 
-func (app *App) getProjectByID(projectID uint) (DbProject, error) {
-	return getByID[DbProject](app, projectID)
+func (app *App) getProjectFirst(projectID uint) (DbProject, error) {
+	return getFirst[DbProject](app, projectID)
 }
 
-func (app *App) getFileByID(fileID uint) (DbFile, error) {
-	return getByID[DbFile](app, fileID)
+func (app *App) getFileFirst(fileID uint) (DbFile, error) {
+	return getFirst[DbFile](app, fileID)
 }
 
-func (app *App) getUserByID(userID uuid.UUID) (DbUser, error) {
-	return getByID[DbUser](app, uint(userID.ID()))
+func (app *App) getUserFirst(userID uuid.UUID) (DbUser, error) {
+	return getFirst[DbUser](app, userID)
 }
 
 func (app *App) createLang(lang *DbLang) (uint, error) {

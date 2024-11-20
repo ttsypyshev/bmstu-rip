@@ -74,7 +74,7 @@ func (app *App) GetServiceByID(c *gin.Context) {
 		return
 	}
 
-	lang, err := app.getLangByID(uint(id))
+	lang, err := app.getLangFirst(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] language not found for the given ID"), err)
 		return
@@ -172,7 +172,7 @@ func (app *App) UpdateService(c *gin.Context) {
 		return
 	}
 
-	service, err := app.getLangByID(uint(id))
+	service, err := app.getLangFirst(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] service not found"), err)
 		return
@@ -232,7 +232,7 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 		return
 	}
 
-	service, err := app.getLangByID(uint(id))
+	service, err := app.getLangFirst(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] service not found"), err)
 		return
@@ -284,7 +284,7 @@ func (app *App) DeleteService(c *gin.Context) {
 		return
 	}
 
-	service, err := app.getLangByID(uint(id))
+	service, err := app.getLangFirst(uint(id))
 	if err != nil {
 		handleError(c, http.StatusNotFound, errors.New("[err] service not found"), err)
 		return
@@ -321,7 +321,7 @@ type AddServiceRequest struct {
 // @Failure 400 {object} ErrorResponse "Invalid request format or missing fields"
 // @Failure 401 {object} ErrorResponse "Unauthorized"
 // @Failure 500 {object} ErrorResponse "Internal server error"
-// @Router /info/draft [post]
+// @Router /info/add-service [post]
 func (app *App) AddServiceToDraft(c *gin.Context) {
 	requestUserID, err := ExtractUserID(c)
 	if err != nil {
