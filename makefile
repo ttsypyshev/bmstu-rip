@@ -27,11 +27,11 @@ kill_process:
 # Сборка Go-программы
 build: swag
 	@echo "Сборка Go-программы..."
-	@go build -o $(EXECUTABLE) $(SRC_DIR)/main.go
+	@go build -v -o $(EXECUTABLE) $(SRC_DIR)/main.go
 	@echo "Сборка завершена. Программа сохранена в $(EXECUTABLE)."
 
 # Запуск Go-программы
-run: kill_process build swag
+run: kill_process build
 	@echo "Запуск Go-программы..."
 	@GIN_MODE=release ./$(EXECUTABLE)
 

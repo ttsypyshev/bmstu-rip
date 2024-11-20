@@ -8,8 +8,8 @@ import (
 )
 
 type DeleteFileRequest struct {
-	ProjectID uint `json:"project_id" binding:"required"`
-	LangID    uint `json:"lang_id" binding:"required"`
+	ProjectID uint `json:"project_id" example:"4"`
+	LangID    uint `json:"lang_id" example:"2"`
 }
 
 // DeleteFileFromProject godoc
@@ -68,11 +68,11 @@ func (app *App) DeleteFileFromProject(c *gin.Context) {
 }
 
 type UpdateFileRequest struct {
-	ProjectID uint   `json:"project_id" binding:"required"`
-	LangID    uint   `json:"lang_id" binding:"required"`
-	Code      string `json:"code"`
-	FileName  string `json:"filename"`
-	Comment   string `json:"comment"`
+	ProjectID uint   `json:"project_id" example:"4"`
+	LangID    uint   `json:"lang_id" example:"1"`
+	Code      string `json:"code" example:"function processData() {...}"`
+	FileName  string `json:"filename" example:"dataProcessor.js"`
+	Comment   string `json:"comment" example:"Refactored the data processing function"`
 }
 
 // UpdateFileInProject godoc

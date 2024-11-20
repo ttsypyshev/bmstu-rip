@@ -1,136 +1,183 @@
 basePath: /
 definitions:
-  backend.AddProjectRequest:
-    properties:
-      file_codes:
-        additionalProperties:
-          type: string
-        type: object
-    type: object
   backend.AddServiceRequest:
     properties:
       id_lang:
+        example: 3
         type: integer
     type: object
   backend.CompleteProjectRequest:
     properties:
       comment:
+        example: Project successfully completed
         type: string
       status:
-        $ref: '#/definitions/database.Status'
+        allOf:
+        - $ref: '#/definitions/database.Status'
+        example: completed
     type: object
   backend.CreateServiceRequest:
     properties:
       author:
+        example: John Doe
         type: string
       description:
+        example: This is a detailed description of the service and its features
         type: string
       list:
         additionalProperties:
           type: string
+        example:
+          item1: "10"
+          item2: "20"
+          item3: "30"
+          item4: "40"
         type: object
       name:
+        example: Example Service
         type: string
       short_description:
+        example: This is a short description of the service
         type: string
       version:
+        example: 1.0.0
         type: string
       year:
+        example: "2024"
         type: string
     type: object
   backend.DeleteFileRequest:
     properties:
       lang_id:
+        example: 2
         type: integer
       project_id:
+        example: 4
         type: integer
-    required:
-    - lang_id
-    - project_id
     type: object
   backend.DeleteProjectRequest:
     properties:
       file_codes:
         additionalProperties:
           type: string
+        example:
+          "6": file_code_1
+          "7": file_code_2
+          "8": file_code_3
         type: object
     type: object
   backend.ErrorResponse:
     properties:
-      code:
-        type: boolean
       message:
+        example: '[err] invalid request format'
         type: string
+      status:
+        example: false
+        type: boolean
     type: object
   backend.RegisterUserRequest:
     properties:
       email:
+        example: johndoe@example.com
         type: string
       login:
+        example: johndoe123
         type: string
       name:
+        example: John Doe
         type: string
       password:
+        example: newsecurepassword456
         type: string
+    type: object
+  backend.SubmitProjectRequest:
+    properties:
+      file_codes:
+        additionalProperties:
+          type: string
+        example:
+          "6": file_code_1
+          "7": file_code_2
+          "8": file_code_3
+        type: object
     type: object
   backend.UpdateFileRequest:
     properties:
       code:
+        example: function processData() {...}
         type: string
       comment:
+        example: Refactored the data processing function
         type: string
       filename:
+        example: dataProcessor.js
         type: string
       lang_id:
+        example: 1
         type: integer
       project_id:
+        example: 4
         type: integer
-    required:
-    - lang_id
-    - project_id
     type: object
   backend.UpdateProjectRequest:
     properties:
       comment:
+        example: Updated project status to draft
         type: string
       status:
-        $ref: '#/definitions/database.Status'
+        allOf:
+        - $ref: '#/definitions/database.Status'
+        example: draft
     type: object
   backend.UpdateServiceRequest:
     properties:
       author:
+        example: Jane Smith
         type: string
       description:
+        example: Updated detailed description of the service
         type: string
       list:
         additionalProperties:
           type: string
+        example:
+          item1: "15"
+          item2: "25"
+          item3: "35"
+          item4: "45"
         type: object
       name:
+        example: Updated Service Name
         type: string
       short_description:
+        example: Updated short description
         type: string
       version:
+        example: 2.0.0
         type: string
       year:
+        example: "2025"
         type: string
     type: object
   backend.UpdateUserProfileRequest:
     properties:
       email:
+        example: test@test.com
         type: string
       name:
+        example: Jane Doe 1
         type: string
       password:
+        example: newsecurepassword456
         type: string
     type: object
   backend.UserLoginRequest:
     properties:
       login:
-        example: user@example.com
+        example: user1
         type: string
       password:
-        example: securepassword
+        example: userPass123
         type: string
     type: object
   backend.UserLoginResponse:
@@ -280,11 +327,11 @@ definitions:
     - Second
     - Minute
     - Hour
-host: 127.0.0.1
+host: localhost:8080
 info:
   contact:
     email: ttsypyshev01@gmail.com
-    name: API Support
+    name: ttsypyshev
     url: https://vk.com/ttsypyshev
   description: Bmstu Open IT Platform
   license:
@@ -846,7 +893,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/backend.AddProjectRequest'
+          $ref: '#/definitions/backend.SubmitProjectRequest'
       produces:
       - application/json
       responses:
@@ -998,6 +1045,5 @@ paths:
       tags:
       - Users
 schemes:
-- https
 - http
 swagger: "2.0"

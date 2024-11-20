@@ -77,8 +77,8 @@ func (app *App) GetProjectByID(c *gin.Context) {
 }
 
 type UpdateProjectRequest struct {
-	Status  database.Status `json:"status"`
-	Comment string          `json:"comment"`
+	Status  database.Status `json:"status" example:"draft"`
+	Comment string          `json:"comment" example:"Updated project status to draft"`
 }
 
 // UpdateProject godoc
@@ -122,7 +122,7 @@ func (app *App) UpdateProject(c *gin.Context) {
 	}
 
 	if requestUserID != project.UserID {
-		handleError(c, http.StatusNotFound, errors.New("[err] project does not belong to the user"), err)
+		handleError(c, http.StatusForbidden, errors.New("[err] project does not belong to the user"), err)
 		return
 	}
 
@@ -148,8 +148,8 @@ func (app *App) UpdateProject(c *gin.Context) {
 	})
 }
 
-type AddProjectRequest struct {
-	FileCodes map[uint]string `json:"file_codes"`
+type SubmitProjectRequest struct {
+	FileCodes map[uint]string `json:"file_codes" example:"6:file_code_1,7:file_code_2,8:file_code_3"`
 }
 
 // SubmitProject godoc
@@ -159,7 +159,7 @@ type AddProjectRequest struct {
 // @Accept json
 // @Produce json
 // @Param id path int true "Project ID"
-// @Param request body AddProjectRequest true "Request payload for submitting project"
+// @Param request body SubmitProjectRequest true "Request payload for submitting project"
 // @Success 200 {object} gin.H "Successfully submitted the project"
 // @Failure 400 {object} ErrorResponse "Invalid request format or project ID"
 // @Failure 401 {object} ErrorResponse "Unauthorized access"
@@ -180,7 +180,7 @@ func (app *App) SubmitProject(c *gin.Context) {
 		return
 	}
 
-	var req AddProjectRequest
+	var req SubmitProjectRequest
 	if err = c.ShouldBind(&req); err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("[err] invalid data format"), err)
 		return
@@ -215,8 +215,8 @@ func (app *App) SubmitProject(c *gin.Context) {
 }
 
 type CompleteProjectRequest struct {
-	Status  database.Status `json:"status"`
-	Comment string          `json:"comment"`
+	Status  database.Status `json:"status" example:"completed"`
+	Comment string          `json:"comment" example:"Project successfully completed"`
 }
 
 // CompleteProject godoc
@@ -289,7 +289,7 @@ func (app *App) CompleteProject(c *gin.Context) {
 }
 
 type DeleteProjectRequest struct {
-	FileCodes map[uint]string `json:"file_codes"`
+	FileCodes map[uint]string `json:"file_codes" example:"6:file_code_1,7:file_code_2,8:file_code_3"`
 }
 
 // DeleteProject godoc

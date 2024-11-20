@@ -10,7 +10,7 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "API Support",
+            "name": "ttsypyshev",
             "url": "https://vk.com/ttsypyshev",
             "email": "ttsypyshev01@gmail.com"
         },
@@ -834,7 +834,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/backend.AddProjectRequest"
+                            "$ref": "#/definitions/backend.SubmitProjectRequest"
                         }
                     }
                 ],
@@ -1059,22 +1059,12 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "backend.AddProjectRequest": {
-            "type": "object",
-            "properties": {
-                "file_codes": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "backend.AddServiceRequest": {
             "type": "object",
             "properties": {
                 "id_lang": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 3
                 }
             }
         },
@@ -1082,10 +1072,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "comment": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Project successfully completed"
                 },
                 "status": {
-                    "$ref": "#/definitions/database.Status"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/database.Status"
+                        }
+                    ],
+                    "example": "completed"
                 }
             }
         },
@@ -1093,43 +1089,53 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "author": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "John Doe"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "This is a detailed description of the service and its features"
                 },
                 "list": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
+                    },
+                    "example": {
+                        "item1": "10",
+                        "item2": "20",
+                        "item3": "30",
+                        "item4": "40"
                     }
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Service"
                 },
                 "short_description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "This is a short description of the service"
                 },
                 "version": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "1.0.0"
                 },
                 "year": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2024"
                 }
             }
         },
         "backend.DeleteFileRequest": {
             "type": "object",
-            "required": [
-                "lang_id",
-                "project_id"
-            ],
             "properties": {
                 "lang_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 2
                 },
                 "project_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 4
                 }
             }
         },
@@ -1140,6 +1146,11 @@ const docTemplate = `{
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
+                    },
+                    "example": {
+                        "6": "file_code_1",
+                        "7": "file_code_2",
+                        "8": "file_code_3"
                     }
                 }
             }
@@ -1147,11 +1158,13 @@ const docTemplate = `{
         "backend.ErrorResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "boolean"
-                },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "[err] invalid request format"
+                },
+                "status": {
+                    "type": "boolean",
+                    "example": false
                 }
             }
         },
@@ -1159,40 +1172,61 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "johndoe@example.com"
                 },
                 "login": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "johndoe123"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "John Doe"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "newsecurepassword456"
+                }
+            }
+        },
+        "backend.SubmitProjectRequest": {
+            "type": "object",
+            "properties": {
+                "file_codes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "6": "file_code_1",
+                        "7": "file_code_2",
+                        "8": "file_code_3"
+                    }
                 }
             }
         },
         "backend.UpdateFileRequest": {
             "type": "object",
-            "required": [
-                "lang_id",
-                "project_id"
-            ],
             "properties": {
                 "code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "function processData() {...}"
                 },
                 "comment": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Refactored the data processing function"
                 },
                 "filename": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "dataProcessor.js"
                 },
                 "lang_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "project_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 4
                 }
             }
         },
@@ -1200,10 +1234,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "comment": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Updated project status to draft"
                 },
                 "status": {
-                    "$ref": "#/definitions/database.Status"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/database.Status"
+                        }
+                    ],
+                    "example": "draft"
                 }
             }
         },
@@ -1211,28 +1251,40 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "author": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Jane Smith"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Updated detailed description of the service"
                 },
                 "list": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
+                    },
+                    "example": {
+                        "item1": "15",
+                        "item2": "25",
+                        "item3": "35",
+                        "item4": "45"
                     }
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Updated Service Name"
                 },
                 "short_description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Updated short description"
                 },
                 "version": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2.0.0"
                 },
                 "year": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025"
                 }
             }
         },
@@ -1240,13 +1292,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "test@test.com"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Jane Doe 1"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "newsecurepassword456"
                 }
             }
         },
@@ -1255,11 +1310,11 @@ const docTemplate = `{
             "properties": {
                 "login": {
                     "type": "string",
-                    "example": "user@example.com"
+                    "example": "user1"
                 },
                 "password": {
                     "type": "string",
-                    "example": "securepassword"
+                    "example": "userPass123"
                 }
             }
         },
@@ -1479,9 +1534,9 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "127.0.0.1",
+	Host:             "localhost:8080",
 	BasePath:         "/",
-	Schemes:          []string{"https", "http"},
+	Schemes:          []string{"http"},
 	Title:            "BITOP",
 	Description:      "Bmstu Open IT Platform",
 	InfoInstanceName: "swagger",

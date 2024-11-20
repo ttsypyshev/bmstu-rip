@@ -86,13 +86,13 @@ func (app *App) GetServiceByID(c *gin.Context) {
 }
 
 type CreateServiceRequest struct {
-	Name             string            `json:"name"`
-	ShortDescription string            `json:"short_description"`
-	Description      string            `json:"description"`
-	Author           string            `json:"author"`
-	Year             string            `json:"year"`
-	Version          string            `json:"version"`
-	List             map[string]string `json:"list"`
+	Name             string            `json:"name" example:"Example Service"`
+	ShortDescription string            `json:"short_description" example:"This is a short description of the service"`
+	Description      string            `json:"description" example:"This is a detailed description of the service and its features"`
+	Author           string            `json:"author" example:"John Doe"`
+	Year             string            `json:"year" example:"2024"`
+	Version          string            `json:"version" example:"1.0.0"`
+	List             map[string]string `json:"list" example:"item1:10,item2:20,item3:30,item4:40"`
 }
 
 // CreateService godoc
@@ -136,13 +136,13 @@ func (app *App) CreateService(c *gin.Context) {
 }
 
 type UpdateServiceRequest struct {
-	Name             string            `json:"name"`
-	ShortDescription string            `json:"short_description"`
-	Description      string            `json:"description"`
-	Author           string            `json:"author"`
-	Year             string            `json:"year"`
-	Version          string            `json:"version"`
-	List             map[string]string `json:"list"`
+	Name             string            `json:"name" example:"Updated Service Name"`
+	ShortDescription string            `json:"short_description" example:"Updated short description"`
+	Description      string            `json:"description" example:"Updated detailed description of the service"`
+	Author           string            `json:"author" example:"Jane Smith"`
+	Year             string            `json:"year" example:"2025"`
+	Version          string            `json:"version" example:"2.0.0"`
+	List             map[string]string `json:"list" example:"item1:15,item2:25,item3:35,item4:45"`
 }
 
 // UpdateService godoc
@@ -307,7 +307,7 @@ func (app *App) DeleteService(c *gin.Context) {
 }
 
 type AddServiceRequest struct {
-	IDLang uint `json:"id_lang"`
+	IDLang uint `json:"id_lang" example:"3"`
 }
 
 // AddServiceToDraft godoc

@@ -11,10 +11,10 @@ import (
 )
 
 type RegisterUserRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Login    string `json:"login"`
-	Password string `json:"password"`
+	Name     string `json:"name" example:"John Doe"`
+	Email    string `json:"email" example:"johndoe@example.com"`
+	Login    string `json:"login" example:"johndoe123"`
+	Password string `json:"password" example:"newsecurepassword456"`
 }
 
 // RegisterUser godoc
@@ -48,9 +48,9 @@ func (app *App) RegisterUser(c *gin.Context) {
 }
 
 type UpdateUserProfileRequest struct {
-	Password string `json:"password"`
-	Email    string `json:"email"`
-	Name     string `json:"name"`
+	Password string `json:"password" example:"newsecurepassword456"`
+	Email    string `json:"email" example:"test@test.com"`
+	Name     string `json:"name" example:"Jane Doe 1"`
 }
 
 // UpdateUserProfile godoc
@@ -107,8 +107,8 @@ func (app *App) UpdateUserProfile(c *gin.Context) {
 }
 
 type UserLoginRequest struct {
-	Login    string `json:"login" example:"user@example.com"`
-	Password string `json:"password" example:"securepassword"`
+	Login    string `json:"login" example:"user1"`
+	Password string `json:"password" example:"userPass123"`
 }
 
 type UserLoginResponse struct {

@@ -6,7 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
+	_ "rip/doc/swagger"
 	"rip/pkg/config"
 )
 
@@ -47,6 +50,7 @@ func Run() error {
 	}
 
 	app.SetupRoutes(r)
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	if err := r.Run(); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 		return err

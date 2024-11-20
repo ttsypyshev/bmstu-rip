@@ -18,8 +18,8 @@ import (
 
 // @license.name AS IS (NO WARRANTY)
 
-// @host 127.0.0.1
-// @schemes https http
+// @host localhost:8080
+// @schemes http
 // @BasePath /
 
 func main() {

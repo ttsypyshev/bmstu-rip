@@ -36,8 +36,8 @@ func extractObjectNameFromURL(url string) string {
 }
 
 type ErrorResponse struct {
-	Message string `json:"message"`
-	Status  bool   `json:"code"`
+	Message string `json:"message" example:"[err] invalid request format"`
+	Status  bool   `json:"status" example:"false"`
 }
 
 // handleError обрабатывает и логирует ошибки, отправляет ответ
