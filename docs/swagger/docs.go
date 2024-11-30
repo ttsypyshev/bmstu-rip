@@ -1425,9 +1425,6 @@ const docTemplate = `{
                 "completionTime": {
                     "type": "string"
                 },
-                "count": {
-                    "type": "integer"
-                },
                 "creationTime": {
                     "type": "string"
                 },

@@ -18,16 +18,16 @@ type User struct {
 
 // Lang представляет услугу
 type Lang struct {
-	ID               uint   `gorm:"primaryKey;autoIncrement"`
-	Name             string `gorm:"size:50;not null"`
-	ShortDescription string `gorm:"size:255;not null"`
-	Description      string `gorm:"type:text;not null"`
-	ImgLink          string `gorm:"size:255"`
-	Author           string `gorm:"size:50"`
-	Year             string `gorm:"size:4"`
-	Version          string `gorm:"size:50"`
+	ID               uint    `gorm:"primaryKey;autoIncrement"`
+	Name             string  `gorm:"size:50;not null"`
+	ShortDescription string  `gorm:"size:255;not null"`
+	Description      string  `gorm:"type:text;not null"`
+	ImgLink          *string `gorm:"size:255"`
+	Author           *string `gorm:"size:50"`
+	Year             *string `gorm:"size:4"`
+	Version          *string `gorm:"size:50"`
 	List             JSONB  `gorm:"type:jsonb"`
-	Status           bool   `gorm:"default:true;not null"`
+	Status           bool    `gorm:"default:true;not null"`
 }
 
 // Project представляет заявку
@@ -42,19 +42,18 @@ type Project struct {
 	Status           Status     `gorm:"type:project_status;not null"`
 	ModeratorID      *uuid.UUID `gorm:"type:uuid"`
 	Moderator        *User      `gorm:"foreignKey:ModeratorID" json:"Moderator,omitempty"`
-	ModeratorComment string     `gorm:"type:text"`
-	Count            int        `gorm:"default:0"`
+	ModeratorComment *string    `gorm:"type:text"`
 }
 
 // File представляет файл
 type File struct {
-	ID        uint   `gorm:"primaryKey"`
-	LangID    uint   `gorm:"not null"`
-	Lang      *Lang  `gorm:"foreignKey:LangID" json:"Lang,omitempty"`
-	ProjectID uint   `gorm:"not null"`
-	Code      string `gorm:"type:text"`
-	FileName  string `gorm:"size:255"`
-	FileSize  int64  `gorm:"default:0"`
-	Comment   string `gorm:"type:text"`
-	AutoCheck int    `gorm:"default:0"`
+	ID        uint    `gorm:"primaryKey"`
+	LangID    uint    `gorm:"not null"`
+	Lang      *Lang   `gorm:"foreignKey:LangID" json:"Lang,omitempty"`
+	ProjectID uint    `gorm:"not null"`
+	Code      string  `gorm:"type:text"`
+	FileName  *string `gorm:"size:255"`
+	FileSize  int64   `gorm:"default:0"`
+	Comment   *string `gorm:"type:text"`
+	AutoCheck *int
 }

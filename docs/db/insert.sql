@@ -82,35 +82,31 @@ INSERT INTO langs (name, img_link, short_description, author, year, version, des
 
 
 
-INSERT INTO projects (user_id, creation_time, status, moderator_id, count)
+INSERT INTO projects (user_id, creation_time, status, moderator_id)
 VALUES
     (
         (SELECT id FROM users WHERE login = 'user1' LIMIT 1), 
         NOW(), 
         'deleted', 
-        (SELECT id FROM users WHERE login = 'admin1' LIMIT 1), 
-        2
+        (SELECT id FROM users WHERE login = 'admin1' LIMIT 1)
     ),
     (
         (SELECT id FROM users WHERE login = 'user1' LIMIT 1), 
         NOW(), 
         'created', 
-        (SELECT id FROM users WHERE login = 'admin1' LIMIT 1), 
-        3
+        (SELECT id FROM users WHERE login = 'admin1' LIMIT 1)
     ),
     (
         (SELECT id FROM users WHERE login = 'user2' LIMIT 1), 
         NOW(), 
         'draft', 
-        (SELECT id FROM users WHERE login = 'admin1' LIMIT 1), 
-        0
+        (SELECT id FROM users WHERE login = 'admin1' LIMIT 1)
     ),
     (
         (SELECT id FROM users WHERE login = 'user1' LIMIT 1), 
         NOW(), 
         'draft', 
-        NULL, 
-        0
+        NULL
     );
 
 

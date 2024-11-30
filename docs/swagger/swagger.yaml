@@ -250,8 +250,6 @@ definitions:
         $ref: '#/definitions/database.User'
       completionTime:
         type: string
-      count:
-        type: integer
       creationTime:
         type: string
       formationTime:

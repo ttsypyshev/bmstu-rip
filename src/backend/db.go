@@ -3,6 +3,7 @@ package backend
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"rip/pkg/config"
 	"rip/pkg/database"
 	"strings"
@@ -216,10 +217,6 @@ func (app *App) createFile(projectID, langID uint) error {
 		return err
 	}
 
-	if err := app.db.db.Model(&DbProject{}).Where("id = ?", projectID).Update("count", gorm.Expr("count + ?", 1)).Error; err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -241,10 +238,6 @@ func (app *App) deleteFile(projectID, fileID uint) error {
 	}
 
 	if err := app.db.db.Delete(&DbFile{}, fileID).Error; err != nil {
-		return err
-	}
-
-	if err := app.db.db.Model(&DbProject{}).Where("id = ?", projectID).Update("count", gorm.Expr("count - ?", 1)).Error; err != nil {
 		return err
 	}
 
@@ -371,7 +364,7 @@ func (app *App) filterProjects(startDate, endDate, status string) ([]DbProject, 
 // Подсчет количества файлов в проекте
 func (app *App) getProjectCount(projectID uint) (int64, error) {
 	var count int64
-	if err := app.db.db.Model(&DbProject{}).Select("count").Where("id = ?", projectID).Scan(&count).Error; err != nil {
+	if err := app.db.db.Model(&DbFile{}).Where("project_id = ?", projectID).Count(&count).Error; err != nil {
 		return -1, err
 	}
 
@@ -455,4 +448,22 @@ func (app *App) matchPassword(login string, password string) (bool, DbUser, erro
 	}
 
 	return false, DbUser{}, nil
+}
+
+func (app *App) updateAutocheck(projectID uint) error {
+	files, err := getAll[DbFile](app, func(db *gorm.DB) *gorm.DB {
+		return db.Where("project_id = ?", projectID)
+	})
+	if err != nil {
+		return err
+	}
+
+	for id, file := range files {
+		randomValue := rand.Intn(2)
+		file.AutoCheck = &randomValue
+		if err := app.db.db.Save(&file).Error; err != nil {
+			return fmt.Errorf("failed to update file with id %d: %v", id, err)
+		}
+	}
+	return nil
 }

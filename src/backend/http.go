@@ -8,11 +8,12 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func (app *App) SetupRoutes(r *gin.Engine) {
 	// Услуги (домен: `/info`)
-	r.GET("/info", app.AuthMiddleware(), app.GetServiceList)                                          // Получить список услуг с фильтрацией, включая ID заявки-черновика пользователя и количество услуг в этой заявке.
+	r.GET("/info", app.ChekcUser(), app.GetServiceList)                                               // Получить список услуг с фильтрацией, включая ID заявки-черновика пользователя и количество услуг в этой заявке.
 	r.GET("/info/:id", app.GetServiceByID)                                                            // Получить данные конкретной услуги по ее ID.
 	r.POST("/info", app.AuthMiddleware(), RoleMiddleware(database.Admin), app.CreateService)          // Добавить новую услугу (без изображения).
 	r.PUT("/info/:id", app.AuthMiddleware(), RoleMiddleware(database.Admin), app.UpdateService)       // Изменить данные услуги по ее ID.
@@ -45,6 +46,42 @@ func (app *App) AuthMiddleware() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 		if strings.HasPrefix(authHeader, "Bearer ") {
 			token = strings.TrimPrefix(authHeader, "Bearer ")
+		}
+
+		claims, err := auth.ValidateJWT(token, app.secret)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			c.Abort()
+			return
+		}
+
+		// Проверка сессии в Redis
+		ctx := context.Background()
+		userID, role := claims.UserID, claims.Role
+		isValid, err := CheckSessionExists(ctx, app.redisClient, userID)
+		if err != nil || !isValid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired session"})
+			c.Abort()
+			return
+		}
+
+		c.Set("userID", userID)
+		c.Set("role", role)
+
+		c.Next()
+	}
+}
+
+func (app *App) ChekcUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var token string
+		authHeader := c.GetHeader("Authorization")
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			token = strings.TrimPrefix(authHeader, "Bearer ")
+		} else {
+			c.Set("userID", uuid.Nil.String())
+			c.Next()
+			return
 		}
 
 		claims, err := auth.ValidateJWT(token, app.secret)

@@ -78,7 +78,7 @@ func (app *App) GetProjectByID(c *gin.Context) {
 
 type UpdateProjectRequest struct {
 	Status  database.Status `json:"status" example:"draft"`
-	Comment string          `json:"comment" example:"Updated project status to draft"`
+	Comment *string         `json:"comment" example:"Updated project status to draft"`
 }
 
 // UpdateProject godoc
@@ -133,7 +133,7 @@ func (app *App) UpdateProject(c *gin.Context) {
 		return
 	}
 
-	if req.Comment != "" {
+	if req.Comment != nil {
 		project.ModeratorComment = req.Comment
 	}
 
@@ -197,9 +197,11 @@ func (app *App) SubmitProject(c *gin.Context) {
 		return
 	}
 
-	if err := app.updateFilesCode(project.ID, req.FileCodes); err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update files"), err)
-		return
+	if req.FileCodes != nil {
+		if err := app.updateFilesCode(project.ID, req.FileCodes); err != nil {
+			handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update files"), err)
+			return
+		}
 	}
 
 	project.Status = database.Created
@@ -216,7 +218,7 @@ func (app *App) SubmitProject(c *gin.Context) {
 
 type CompleteProjectRequest struct {
 	Status  database.Status `json:"status" example:"completed"`
-	Comment string          `json:"comment" example:"Project successfully completed"`
+	Comment *string         `json:"comment" example:"Project successfully completed"`
 }
 
 // CompleteProject godoc
@@ -273,8 +275,14 @@ func (app *App) CompleteProject(c *gin.Context) {
 		return
 	}
 
-	if req.Comment != "" {
+	if req.Comment != nil {
 		project.ModeratorComment = req.Comment
+	}
+
+	err = app.updateAutocheck(project.ID)
+	if err != nil {
+		handleError(c, http.StatusBadRequest, errors.New("[err] failed update autocheck"), err)
+		return
 	}
 
 	if err := app.updateProject(&project); err != nil {
@@ -341,9 +349,11 @@ func (app *App) DeleteProject(c *gin.Context) {
 		return
 	}
 
-	if err := app.updateFilesCode(project.ID, req.FileCodes); err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] failed to update file"), err)
-		return
+	if req.FileCodes != nil {
+		if err := app.updateFilesCode(project.ID, req.FileCodes); err != nil {
+			handleError(c, http.StatusInternalServerError, errors.New("[err] failed to update files"), err)
+			return
+		}
 	}
 
 	project.Status = database.Deleted

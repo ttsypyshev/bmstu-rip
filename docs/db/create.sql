@@ -51,5 +51,5 @@ CREATE TABLE files (
     file_name VARCHAR(255),
     file_size BIGINT DEFAULT 0,
     comment TEXT,
-    auto_check INT DEFAULT 0
+    auto_check INT
 );

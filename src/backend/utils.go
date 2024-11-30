@@ -2,6 +2,7 @@ package backend
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 
@@ -80,17 +81,17 @@ func (app *App) GetFilteredLangs(query string) ([]DbLang, error) {
 func ExtractUserID(c *gin.Context) (uuid.UUID, error) {
 	idAny, exists := c.Get("userID")
 	if !exists {
-		return uuid.UUID{}, errors.New("uuid missing")
+		return uuid.Nil, errors.New("userID is missing from context")
 	}
 
 	idStr, ok := idAny.(string)
 	if !ok {
-		return uuid.UUID{}, errors.New("invalid ID type")
+		return uuid.Nil, fmt.Errorf("expected string for userID, but got %T", idAny)
 	}
 
 	userID, err := uuid.Parse(idStr)
 	if err != nil {
-		return uuid.UUID{}, errors.New("invalid UUID format")
+		return uuid.Nil, fmt.Errorf("invalid UUID format for userID: %v", err)
 	}
 
 	return userID, nil

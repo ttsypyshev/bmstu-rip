@@ -71,8 +71,8 @@ type UpdateFileRequest struct {
 	ProjectID uint   `json:"project_id" example:"4"`
 	LangID    uint   `json:"lang_id" example:"1"`
 	Code      string `json:"code" example:"function processData() {...}"`
-	FileName  string `json:"filename" example:"dataProcessor.js"`
-	Comment   string `json:"comment" example:"Refactored the data processing function"`
+	FileName  *string `json:"filename" example:"dataProcessor.js"`
+	Comment   *string `json:"comment" example:"Refactored the data processing function"`
 }
 
 // UpdateFileInProject godoc
@@ -137,11 +137,11 @@ func (app *App) UpdateFileInProject(c *gin.Context) {
 		file.Code = req.Code
 	}
 
-	if req.FileName != "" {
+	if req.FileName != nil {
 		file.FileName = req.FileName
 	}
 
-	if req.Comment != "" {
+	if req.Comment != nil {
 		file.Comment = req.Comment
 	}
 

@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // GetServiceList godoc
@@ -35,16 +36,20 @@ func (app *App) GetServiceList(c *gin.Context) {
 		return
 	}
 
-	projectID, err := findLastDraft(app, requestUserID)
-	if err != nil {
-		handleError(c, http.StatusNotFound, errors.New("[err] unable to find the last draft project for the user"), err)
-		return
-	}
+	var count int64 = 0
+	var projectID uint = 0
+	if requestUserID != uuid.Nil {
+		projectID, err = findLastDraft(app, requestUserID)
+		if err != nil {
+			handleError(c, http.StatusNotFound, errors.New("[err] unable to find the last draft project for the user"), err)
+			return
+		}
 
-	count, err := app.getProjectCount(projectID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, errors.New("[err] unable to retrieve project count for the draft"), err)
-		return
+		count, err = app.getProjectCount(projectID)
+		if err != nil {
+			handleError(c, http.StatusInternalServerError, errors.New("[err] unable to retrieve project count for the draft"), err)
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -89,9 +94,9 @@ type CreateServiceRequest struct {
 	Name             string            `json:"name" example:"Example Service"`
 	ShortDescription string            `json:"short_description" example:"This is a short description of the service"`
 	Description      string            `json:"description" example:"This is a detailed description of the service and its features"`
-	Author           string            `json:"author" example:"John Doe"`
-	Year             string            `json:"year" example:"2024"`
-	Version          string            `json:"version" example:"1.0.0"`
+	Author           *string           `json:"author" example:"John Doe"`
+	Year             *string           `json:"year" example:"2024"`
+	Version          *string           `json:"version" example:"1.0.0"`
 	List             map[string]string `json:"list" example:"item1:10,item2:20,item3:30,item4:40"`
 }
 
@@ -139,9 +144,9 @@ type UpdateServiceRequest struct {
 	Name             string            `json:"name" example:"Updated Service Name"`
 	ShortDescription string            `json:"short_description" example:"Updated short description"`
 	Description      string            `json:"description" example:"Updated detailed description of the service"`
-	Author           string            `json:"author" example:"Jane Smith"`
-	Year             string            `json:"year" example:"2025"`
-	Version          string            `json:"version" example:"2.0.0"`
+	Author           *string           `json:"author" example:"Jane Smith"`
+	Year             *string           `json:"year" example:"2025"`
+	Version          *string           `json:"version" example:"2.0.0"`
 	List             map[string]string `json:"list" example:"item1:15,item2:25,item3:35,item4:45"`
 }
 
@@ -187,13 +192,13 @@ func (app *App) UpdateService(c *gin.Context) {
 	if input.Description != "" {
 		service.Description = input.Description
 	}
-	if input.Author != "" {
+	if input.Author != nil {
 		service.Author = input.Author
 	}
-	if input.Year != "" {
+	if input.Year != nil {
 		service.Year = input.Year
 	}
-	if input.Version != "" {
+	if input.Version != nil {
 		service.Version = input.Version
 	}
 	if len(input.List) != 0 {
@@ -250,7 +255,7 @@ func (app *App) UpdateServiceImage(c *gin.Context) {
 		return
 	}
 
-	service.ImgLink = imageURL
+	service.ImgLink = &imageURL
 	service.Status = false
 
 	if err := app.updateLang(&service); err != nil {
@@ -290,7 +295,7 @@ func (app *App) DeleteService(c *gin.Context) {
 		return
 	}
 
-	if err := app.deleteImageFromMinIO(service.ImgLink); err != nil {
+	if err := app.deleteImageFromMinIO(*service.ImgLink); err != nil {
 		handleError(c, http.StatusInternalServerError, errors.New("[err] failed to delete image from MinIO"), err)
 		return
 	}

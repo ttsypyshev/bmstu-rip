@@ -2,6 +2,8 @@ package backend
 
 import (
 	"log"
+	"math/rand"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
@@ -48,6 +50,8 @@ func Run() error {
 		log.Fatalf("Error load secret phrase: %v", err)
 		return err
 	}
+
+	rand.Seed(time.Now().UnixNano())
 
 	app.SetupRoutes(r)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
