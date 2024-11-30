@@ -1,29 +1,5 @@
-:root {
-  --font-family-default: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, SFProLocalRange;
-  --color-background-dark: #0d1117;
-  --color-background-light: #d9d9d9;
-  --color-background-darkest: #212830;
-  --color-background-lightest: #ababab;
-  --color-text-light: #ffffff;
-  --color-text-dark: #000000;
-  --color-text-muted: #d6d6d6;
-  --color-border: #ffffff;
-  --border-radius-small: 20px;
-  --border-radius-default: 25px;
-  --border-radius-large: 40px;
-  --font-size-large: 35px;
-  --font-size-default: 30px;
-  --font-size-small: 25px;
-  --line-height-large: 53px;
-  --line-height-default: 45px;
-  --line-height-small: 27px;
-  --font-weight-regular: 400;
-  --font-weight-bold: 700;
-}
-
-
 body {
-  background-color: var(--color-background-dark);
+  background-color: var(--background-color-darkest);
   margin: 0;
   padding: 0;
 }
@@ -34,6 +10,7 @@ body {
   position: relative;
 }
 
+/* Back Button Styles */
 .icon-btn-back {
   position: absolute;
   width: 50px;
@@ -48,57 +25,63 @@ body {
   height: 70px;
   top: 58px;
   left: 89px;
-  background-color: var(--color-background-lightest);
-  border-radius: 5px;
+  background-color: var(--background-color-lightest);
+  border-radius: var(--border-radius-xs);
 }
 
+/* Header Styles */
 .header {
   display: flex;
-  justify-content: center; /* Центрирование по горизонтали */
-  align-items: center;      /* Центрирование по вертикали */
-  max-width: 1940px;        /* Ограничение максимальной ширины */
-  margin: 0 auto;           /* Центрирование на странице */
-  position: relative;       /* Позиционирование относительно родителя */
-  padding: 0;          /* Добавляем вертикальные отступы */
-  box-sizing: border-box;    /* Учитываем padding в расчёте ширины */
+  justify-content: center;
+  align-items: center;
+  max-width: 1940px;
+  margin: 0 auto;
+  padding: 0;
+  position: relative;
+  box-sizing: border-box;
 }
-
 
 .file-count-text {
   position: absolute;
   top: 33px;
   left: 40px;
-  font-family: "Inter", var(--font-family-default);
-  color: var(--color-text-light);
-  font-size: var(--font-size-small);
+  font-family: var(--font-family-default);
+  color: var(--text-color-light);
+  font-size: var(--font-size);
   font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-small);
+  line-height: var(--line-height-sm);
   text-align: center;
   white-space: nowrap;
-  letter-spacing: 0;
   z-index: 5;
 }
 
 .file-count-icon {
   filter: brightness(0) invert(1);
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 95px;
   height: 85px;
+  transition: transform 0.1s, filter 0.1s;
 }
 
+.file-count-icon:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2) invert(1);
+}
+
+.file-count-icon:active {
+  transform: scale(0.95);
+  filter: brightness(0.8) invert(1);
+}
+
+/* Search Field Styles */
 .field-search-text {
   position: relative;
   left: 81px;
   width: 1050px;
-  max-width: 1050px;
   height: 75px;
-  font-family: "Inter", var(--font-family-default);
-  color: var(--color-text-dark);
-  font-size: var(--font-size-default);
+  font-family: var(--font-family-default);
+  color: var(--text-color-dark);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-regular);
-  text-align: left;
   background-color: transparent;
   box-sizing: border-box;
   white-space: nowrap;
@@ -106,14 +89,13 @@ body {
   resize: none;
   outline: none;
   border: none;
-  letter-spacing: 0;
   z-index: 5;
 }
 
 .field-search-text::placeholder {
-  font-family: "Inter", var(--font-family-default);
-  font-size: var(--font-size-default);
-  color: var(--color-text-dark);
+  font-family: var(--font-family-default);
+  font-size: var(--font-size-lg);
+  color: var(--text-color-dark);
 }
 
 .search-icon {
@@ -124,15 +106,17 @@ body {
   height: 38px;
 }
 
+/* Separator Line */
 .separator-line {
   position: absolute;
   top: 309px;
   left: 244px;
   width: 1432px;
   height: 1px;
-  background-color: var(--color-border);
+  background-color: var(--border-color-light);
 }
 
+/* Section Styles */
 .search-section,
 .file-count-section {
   position: absolute;
@@ -150,52 +134,53 @@ body {
   left: 314px;
   width: 1161px;
   height: 75px;
-  background-color: var(--color-background-light);
-  border-radius: var(--border-radius-large);
+  background-color: var(--background-color-lightest);
+  border-radius: var(--border-radius-xl);
 }
 
+/* Service List Styles */
 .service-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px; /* Задаем отступы между элементами */
-  padding: 0;
   top: 370px;
-  margin: auto;
+  gap: 30px;
+  margin: 0 auto;
+  padding: 0;
   position: relative;
   width: 1500px;
   list-style-type: none;
 }
 
 .service-item {
-  width: calc(50% - 20px); /* Устанавливаем ширину на 50% с учетом отступов */
-  height: 220px; /* Оставляем фиксированную высоту */
-  border-radius: var(--border-radius-small);
-  background-color: var(--color-background-darkest);
+  width: calc(50% - 20px);
+  height: 220px;
+  border-radius: var(--border-radius);
+  background-color: var(--background-color-dark);
   position: relative;
 }
 
 .service-link {
-  display: block; /* Позволяет ссылке занимать всю ширину элемента списка */
-  width: 100%; /* Задаем ширину в 100% от родительского элемента */
-  height: 100%; /* Задаем высоту в 100% от родительского элемента */
-  text-decoration: none; /* Убирает подчеркивание текста */
-  color: inherit; /* Устанавливает цвет текста как у родительского элемента */
-  transition: background-color 0.3s ease; /* Плавный переход при изменении фона */
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.3s ease;
 }
 
-/* Стили при наведении мыши */
 .service-link:hover {
-  background-color: rgba(0, 0, 0, 0.1); /* Изменение фона при наведении */
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
+/* Service Title and Description */
 .service-title {
-  margin-top: 10px;
+  padding-top: 10px;
   margin-left: 20px;
-  font-family: "Inter", var(--font-family-default);
-  color: var(--color-text-light);
-  font-size: var(--font-size-large);
+  font-family: var(--font-family-default);
+  color: var(--text-color-light);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-large);
+  line-height: var(--line-height-xl);
   text-align: left;
   white-space: nowrap;
 }
@@ -203,15 +188,15 @@ body {
 .service-description {
   margin-left: 20px;
   max-width: 550px;
-  font-family: "PT Mono", var(--font-family-default);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-small);
+  font-family: var(--font-family-mono);
+  color: var(--text-color-muted);
+  font-size: var(--font-size);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-small);
+  line-height: var(--line-height-sm);
   text-align: left;
-  white-space: normal;
 }
 
+/* Service Image */
 .service-image {
   position: absolute;
   top: 16px;
@@ -221,41 +206,86 @@ body {
   object-fit: cover;
 }
 
+/* Add to Project Button */
 .add-to-project-button-background {
   position: absolute;
   top: 135px;
   left: 30px;
   width: 310px;
   height: 60px;
-  background-color: var(--color-background-light);
-  border-radius: var(--border-radius-default);
-  display: flex; /* Для центровки текста */
-  align-items: center; /* Вертикальная центровка */
-  justify-content: center; /* Горизонтальная центровка */
+  background-color: var(--background-color-lightest);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+  border: none;
+  outline: none;
 }
 
+.add-to-project-button-background.success {
+  animation: successAnimation 3s forwards;
+}
+
+.add-to-project-button-background.error {
+  animation: errorAnimation 3s forwards;
+}
+
+.add-to-project-button-background:hover {
+  transform: scale(1.05);
+  background-color: var(--background-color-muted);
+}
+
+@keyframes successAnimation {
+  0% {
+    background-color: var(--background-color-muted);
+  }
+  20% {
+    background-color: var(--background-color-green);
+  }
+  100% {
+    background-color: var(--background-color-lightest);
+  }
+}
+
+@keyframes errorAnimation {
+  0% {
+    background-color: var(--background-color-muted);
+  }
+  20% {
+    background-color: var(--background-color-red);
+  }
+  100% {
+    background-color: var(--background-color-lightest);
+  }
+}
+
+/* Button Text */
 .add-to-project-button-text {
-  font-family: "Inter", var(--font-family-default);
-  color: var(--color-text-dark);
-  font-size: var(--font-size-default);
+  font-family: var(--font-family-default);
+  color: var(--text-color-dark);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-default);
+  line-height: var(--line-height-lg);
   white-space: nowrap;
 }
 
+/* Error Message */
 .error {
   text-align: center;
-  background-color: var(--color-background-darkest);
-  color: var(--color-text-light);
+  background-color: var(--background-color-dark);
+  color: var(--text-color-light);
   padding: 30px;
-  border-radius: var(--border-radius-default);
+  border-radius: var(--border-radius-lg);
   max-width: 400px;
 }
 
+/* Headings */
 h1 {
-  font-family: "Inter", var(--font-family-default);
-  font-size: var(--font-size-default);
-  line-height: var(--line-height-default);
+  font-family: var(--font-family-default);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-lg);
   font-weight: var(--font-weight-bold);
   margin: 0;
 }

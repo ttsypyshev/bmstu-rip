@@ -4,23 +4,69 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ .Title }}</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Mono:wght@400&display=swap"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Mono:wght@400&display=swap" />
+    <link rel="stylesheet" href="/static/css/global.css">
     <link rel="stylesheet" href="/static/css/applications.css" />
+    <script>
+        // Функция для сбора данных из текстовых полей
+        const gatherFileCodes = () => {
+            const fileCodes = {};
+            document.querySelectorAll('.field-write-code').forEach(textarea => {
+                const fileId = textarea.closest('li').dataset.fileId; // Получаем идентификатор файла
+                fileCodes[fileId] = textarea.value; // Сохраняем значение текстовой области в объект
+            });
+            return fileCodes;
+        };
+
+        // Обработчик события отправки формы
+        document.addEventListener('DOMContentLoaded', () => {
+            const forms = document.querySelectorAll('.project-form');
+
+            forms.forEach(form => {
+                form.addEventListener('submit', (event) => {
+                    const fileCodes = gatherFileCodes();
+                    const fileCodesInput = document.createElement('input');
+                    fileCodesInput.type = 'hidden';
+                    fileCodesInput.name = 'file_codes';
+                    fileCodesInput.value = JSON.stringify(fileCodes);
+                    form.appendChild(fileCodesInput);
+                });
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="writing-code">
-      <div class="header">
-        <a href="/home" class="background-btn-back">
-            <img class="icon-btn-back" src="/image/icon-btn-back.png" />
-        </a>
-      </div>
-      <div class="tree">
+        <header class="header">
+            <a href="/home" class="background-btn-back" aria-label="Вернуться на главную">
+                <img class="icon-btn-back" src="/static/img/icon-btn-back.png" alt="Иконка возврата" />
+            </a>
+        </header>
+        <div class="tree">
         {{ if .Files }}
+        <div class="info-box">
+            <h2>Проект №{{ .Project.ID }}</h2>
+            <p>Дата создания: {{ .Project.CreationTime }}</p>
+            <!--
+            <form action="/upd-project" method="POST" class="project-form save-project">
+                <input type="hidden" name="id_project" value="{{ .Project.ID }}" />
+                <button type="submit" class="project-btn save-project-btn">
+                    <span class="save-project-text">Сохранить проект</span>
+                </button>
+            </form>
+            -->
+            <form action="/del-project" method="POST" class="project-form delete-project">
+                <input type="hidden" name="id_project" value="{{ .Project.ID }}" />
+                <button type="submit" class="project-btn delete-project-btn">
+                    <span class="delete-project-text">Удалить проект</span>
+                </button>
+            </form>
+        </div>
         <ul>
           {{ range .Files }}
-          <li>
-            {{ $fileLangID := .ID_lang }}
+          <li data-file-id="{{ .ID }}">
+            {{ $fileLangID := .LangID }}
             {{ $fileCode := .Code }}
             {{ range $.Langs }}
               {{ if eq .ID $fileLangID }}
@@ -31,7 +77,7 @@
                   </div>
                   <div class="background-code">
                     <div class="text-lines">
-                      1<br />2<br />3<br />4<br />5<br />6<br />7<br />8<br />9<br />10<br />11<br />12<br />13<br />14<br />15<br />16<br />17<br />18<br />19<br />20<br />21<br />22<br />23<br />24<br />25<br />26<br />27<br />28<br />29<br />30<br />31
+                      1<br />2<br />3<br />4<br />5<br />6<br />7<br />8<br />9<br />10<br />11<br />12<br />13<br />14<br />15<br />16<br />17<br />18<br />19<br />20<br />21<br />22<br />23<br />24<br />25<br />26<br />27<br />28<br />29<br />30<br />31<br />32<br />33<br />34<br />35<br />
                     </div>
                     <textarea class="field-write-code" placeholder="Введите код здесь...">{{ $fileCode }}</textarea>
                     <div class="text-tech-info">Ln 20, Col 15, Space: 4</div>
@@ -44,7 +90,7 @@
         </ul>
         {{ else }}
           <div class="error">
-            <h1>Данный проект не найден</h1>
+            <h1>В проекте пока нет файлов или он ещё не был создан</h1>
           </div>
         {{ end }}
       </div>

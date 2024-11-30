@@ -1,41 +1,20 @@
-:root {
-  --font-family-default: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, SFProLocalRange;
-  --color-background-dark: #0d1117;
-  --color-background-light: #212830;
-  --color-background-medium: #6f6f6f;
-  --color-background-lightest: #ababab;
-  --color-text-light: #ffffff;
-  --color-text-dark: #000000;
-  --color-btn-send: #238636;
-  --color-border: #ffffff;
-  --font-size-default: 30px;
-  --font-size-small: 25px;
-  --line-height-default: 36px;
-  --line-height-small: 37.5px;
-  --border-radius-default: 25px;
-  --font-weight-regular: 400;
-  --font-weight-bold: 700;
-  --color-title-background: #d9d9d9;
-  --color-basic-info-background: #212830;
-}
-
+/* Body Styles */
 body {
-  background-color: var(--color-background-dark);
+  background-color: var(--background-color-darkest);
   margin: 0;
   padding: 0;
 }
 
+/* Main Information Section */
 .information-about {
   width: 100%;
   min-height: 100vh;
   position: relative;
 }
 
-.header, .icon-btn-back, .background-btn-back {
-  position: absolute;
-}
-
+/* Header Styles */
 .header {
+  position: absolute;
   width: 70px;
   height: 70px;
   top: 58px;
@@ -44,6 +23,7 @@ body {
 }
 
 .icon-btn-back {
+  position: absolute;
   width: 50px;
   height: 50px;
   top: 10px;
@@ -51,51 +31,65 @@ body {
 }
 
 .background-btn-back {
+  position: absolute;
   width: 70px;
   height: 70px;
   top: 0;
   left: 0;
-  background-color: var(--color-background-lightest);
+  background-color: var(--background-color-lightest);
   border-radius: 5px;
 }
 
+/* Info Container */
+.info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 1940px;
+  margin: 0 auto;
+  position: relative;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Title Styles */
 .title {
   position: absolute;
   width: 759px;
   height: 217px;
   top: 226px;
   left: 312px;
-  background-color: var(--color-title-background);
+  background-color: var(--background-color-muted);
   border-radius: 30px;
 }
 
-.text-name-lang {
+/* Text Styles */
+.text-name-lang,
+.text-description-lang {
   position: absolute;
+  left: 27px;
+  font-family: var(--font-family-default);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-color-dark);
+}
+
+.text-name-lang {
   width: 639px;
   top: 12px;
-  left: 27px;
-  font-family: "Inter", var(--font-family-default);
-  font-weight: var(--font-weight-regular);
-  color: var(--color-text-dark);
-  font-size: 55px;
+  font-size: var(--font-size-title);
   letter-spacing: -1.04px;
-  line-height: 82.5px;
-  white-space: nowrap;
+  line-height: var(--line-height-title);
 }
 
 .text-description-lang {
-  position: absolute;
   width: 679px;
   top: 83px;
-  left: 27px;
-  font-family: "Inter", var(--font-family-default);
-  font-weight: var(--font-weight-regular);
-  color: var(--color-text-dark);
-  font-size: 40px;
+  font-size: var(--font-size-subtitle);
   letter-spacing: -0.76px;
-  line-height: 60px;
+  line-height: var(--line-height-subtitle);
 }
 
+/* Image Styles */
 .img-lang {
   position: absolute;
   width: 80px;
@@ -105,64 +99,51 @@ body {
   object-fit: cover;
 }
 
+/* Basic Info Section */
 .background-basic-info {
   position: absolute;
   width: 477px;
   height: 217px;
   top: 226px;
   left: 1120px;
-  background-color: var(--color-basic-info-background);
+  background-color: var(--background-color-dark);
   border-radius: 20px;
-  border: 2px solid;
-  border-color: var(--color-border);
+  border: 2px solid var(--border-color-light);
 }
 
+/* Tag Styles */
 .tag-basic-info {
   position: absolute;
   width: 457px;
   left: 15px;
-  font-family: "Inter", var(--font-family-default);
-  color: var(--color-text-light);
-  font-size: 27px;
-  line-height: 45px;
+  font-family: var(--font-family-default);
+  color: var(--text-color-light);
+  font-size: var(--font-size);
+  line-height: var(--line-height-lg);
   font-weight: var(--font-weight-bold);
 }
 
-.tag-basic-info-1 {
-  top: 0px;
-}
+.tag-basic-info-1 { top: 0; }
+.tag-basic-info-2 { top: 70px; }
+.tag-basic-info-3 { top: 140px; }
 
-.tag-basic-info-2 {
-  top: 70px;
-}
-
-.tag-basic-info-3 {
-  top: 140px;
-}
-
+/* Subtext Styles */
 .subtext-basic-info {
   position: absolute;
   width: 457px;
   left: 15px;
-  font-family: "Inter", var(--font-family-default);
+  font-family: var(--font-family-default);
   font-weight: var(--font-weight-regular);
-  color: var(--color-text-light);
-  font-size: var(--font-size-small);
-  line-height: 45px;
+  color: var(--text-color-light);
+  font-size: var(--font-size);
+  line-height: var(--line-height-lg);
 }
 
-.subtext-basic-info-1 {
-  top: 30px;
-}
+.subtext-basic-info-1 { top: 30px; }
+.subtext-basic-info-2 { top: 100px; }
+.subtext-basic-info-3 { top: 170px; }
 
-.subtext-basic-info-2 {
-  top: 100px;
-}
-
-.subtext-basic-info-3 {
-  top: 170px;
-}
-
+/* Additional Info Section */
 .background-additional-info {
   position: absolute;
   width: 1285px;
@@ -170,36 +151,38 @@ body {
   top: 481px;
   left: 312px;
   padding: 30px;
-  background-color: var(--color-basic-info-background);
+  background-color: var(--background-color-dark);
   border-radius: 20px;
   box-sizing: border-box;
 }
 
+/* Additional Info Text */
 .text-additional-info {
-  color: var(--color-text-light);
-  font-family: "Inter", var(--font-family-default);
-  font-size: var(--font-size-small);
+  color: var(--text-color-light);
+  font-family: var(--font-family-default);
+  font-size: var(--font-size);
   letter-spacing: -0.47px;
-  line-height: 1.5;
+  line-height: var(--line-height-lg);
 }
 
+/* Features List */
 .features-list {
   list-style: none;
   padding-left: 0;
-  margin: 40px 0;
+  margin: 30px 0;
   counter-reset: list-counter;
 }
 
 .features-list li {
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   counter-increment: list-counter;
   position: relative;
-  color: var(--color-text-light);
-  font-family: "Inter", var(--font-family-default);
-  font-size: var(--font-size-small);
-  /* letter-spacing: -0.47px; */
-  line-height: 1.5;
+  color: var(--text-color-light);
+  font-family: var(--font-family-default);
+  font-size: var(--font-size);
+  line-height: var(--line-height-lg);
   letter-spacing: -1.9%;
+  padding-left: 30px;
 }
 
 .features-list li::before {
@@ -210,12 +193,11 @@ body {
   font-weight: var(--font-weight-regular);
 }
 
-.features-list .bold-subtext {
-  margin-bottom: 5px;
-  padding-left: 30px;
+/* Feature Text Styles */
+.bold-subtext {
   font-weight: var(--font-weight-bold);
 }
 
-.features-list .subtext {
+.subtext {
   font-weight: var(--font-weight-regular);
 }

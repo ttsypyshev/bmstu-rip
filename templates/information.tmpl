@@ -6,42 +6,45 @@
     <title>{{ .Title }}</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Mono:wght@400&display=swap"/>
+    <link rel="stylesheet" href="/static/css/global.css">
     <link rel="stylesheet" href="/static/css/information.css" />
 </head>
 <body>
     <div class="information-about">
         <div class="header">
             <a href="/home" class="background-btn-back">
-                <img class="icon-btn-back" src="/image/icon-btn-back.png" />
+                <img class="icon-btn-back" src="/static/img/icon-btn-back.png" />
             </a>
         </div>
-        <div class="title">
-            <div class="text-name-lang">{{ .Info.Name }}</div>
-            <div class="text-description-lang">"{{ .Info.ShortDescription }}"</div>
-            <img class="img-lang" src="{{ .Info.ImgLink }}" /img>
-        </div>
-        <div class="background-basic-info">
-            <div class="tag-basic-info tag-basic-info-1">Автор:</div>
-            <div class="subtext-basic-info subtext-basic-info-1">{{ .Info.Author }}</div>
-            <div class="tag-basic-info tag-basic-info-2">Год выпуска:</div>
-            <div class="subtext-basic-info subtext-basic-info-2">{{ .Info.Year }}</div>
-            <div class="tag-basic-info tag-basic-info-3">Последняя версия:<br /></div>
-            <div class="subtext-basic-info subtext-basic-info-3">{{ .Info.Version }}</div>
-        </div>
-        <div class="background-additional-info">
-            <div class="text-additional-info">
-                <span class="bold-subtext">{{ .Info.Name }}</span>
-                <span class="subtext">{{ .Info.Description }}</span>
+        <div class="info">
+            <div class="title">
+                <div class="text-name-lang">{{ .Info.Name }}</div>
+                <div class="text-description-lang">"{{ .Info.ShortDescription }}"</div>
+                <img class="img-lang" src="{{ .Info.ImgLink }}" /img>
             </div>
+            <div class="background-basic-info">
+                <div class="tag-basic-info tag-basic-info-1">Автор:</div>
+                <div class="subtext-basic-info subtext-basic-info-1">{{ .Info.Author }}</div>
+                <div class="tag-basic-info tag-basic-info-2">Год выпуска:</div>
+                <div class="subtext-basic-info subtext-basic-info-2">{{ .Info.Year }}</div>
+                <div class="tag-basic-info tag-basic-info-3">Последняя версия:<br /></div>
+                <div class="subtext-basic-info subtext-basic-info-3">{{ .Info.Version }}</div>
+            </div>
+            <div class="background-additional-info">
+                <div class="text-additional-info">
+                    <span class="bold-subtext">{{ .Info.Name }}</span>
+                    <span class="subtext">{{ .Info.Description }}</span>
+                </div>
 
-            <ul class="features-list">
-                {{ range $key, $value := .List }}
-                <li>
-                    <span class="bold-subtext">{{ $key }}</span>
-                    <span class="subtext">{{ $value }}</span>
-                </li>
-                {{ end }}
-            </ul>
+                <ul class="features-list">
+                    {{ range $key, $value := .List }}
+                    <li>
+                        <span class="bold-subtext">{{ $key }}</span>
+                        <span class="subtext">{{ $value }}</span>
+                    </li>
+                    {{ end }}
+                </ul>
+            </div>
         </div>
     </div>
 </body>

@@ -13,47 +13,61 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=PT+Mono:wght@400&display=swap"
     />
-    <link rel="stylesheet" href="/static/css/services.css" />
+    <link rel="stylesheet" href="/static/css/global.css"/>
+    <link rel="stylesheet" href="/static/css/services.css"/>
   </head>
   <body>
     <div class="services-container">
       <a href="/home" class="background-btn-back">
-        <img class="icon-btn-back" src="/image/icon-btn-back.png" />
+        <img class="icon-btn-back" src="/static/img/icon-btn-back.png" />
       </a>
       <div class="header">
         <div class="search-section">
           <form action="/home" method="GET">
             <input
               type="text"
-              name="search"
+              name="langname"
               class="field-search-text"
               maxlength="100"
               placeholder="Поиск..."
             />
             <button type="submit" style="display: none;">Поиск</button>
-            <img class="search-icon" src="image/icon-find.png" />
+            <img class="search-icon" src="/static/img/icon-find.png" />
           </form>
         </div>
-        <div class="file-count-section">
-          <a href="/app/1" class="file-count">
-            <img class="file-count-icon" src="image/icon-count-files.png" />
-            <div class="file-count-text">3</div>
-          </a>
-        </div>
-        <img class="separator-line" src="image/line.png" />
+          <div class="file-count-section">
+            {{ if gt $.ProjectID 0 }}
+              <a href="/project/{{ $.ProjectID }}" class="file-count">
+                <img class="file-count-icon" src="/static/img/icon-count-files.png" />
+                <div class="file-count-text">{{ .Count }}</div>
+              </a>
+            {{ else }}
+              <div class="file-count">
+                <img class="file-count-icon" src="/static/img/icon-count-files.png" />
+                <div class="file-count-text">{{ .Count }}</div>
+              </div>
+            {{ end }}
+          </div>
+        <img class="separator-line" src="/static/img/line.png" />
       </div>
       <ul class="service-list two-columns">
-        {{ range .Langs }}
-        <li class="service-item">
-          <a href="/info/{{ .ID }}" class="service-link">
-            <div class="service-title">{{ .Name }}</div>
-            <div class="service-description">{{ .ShortDescription }}</div>
-            <img class="service-image" src="{{ .ImgLink }}" alt="{{ .Name }}"/>
-          </a>
-          <div class="add-to-project-button-background">
-            <div class="add-to-project-button-text">Добавить в проект</div>
-          </div>
-        </li>
+        {{ if .Langs }}
+          {{ range .Langs }}
+            <li class="service-item">
+              <a href="/info/{{ .ID }}" class="service-link">
+                <div class="service-title">{{ .Name }}</div>
+                <div class="service-description">{{ .ShortDescription }}</div>
+                <img class="service-image" src="{{ .ImgLink }}" alt="{{ .Name }}"/>
+              </a>
+              <form action="/add-service" method="POST" class="add-to-project-form">
+                <input type="hidden" name="id_user" value="{{ $.UserID }}" />
+                <input type="hidden" name="id_lang" value="{{ .ID }}" />
+                <button type="submit" class="add-to-project-button-background {{ if and (eq $.Status 1) (eq .ID $.LangID) }}success{{ else if and (eq $.Status 2) (eq .ID $.LangID) }}error{{ end }}">
+                  <div class="add-to-project-button-text">Добавить в проект</div>
+                </button>
+              </form>
+            </li>
+          {{ end }}
         {{ else }}
           <div class="error">
             <h1>Данный язык не найден</h1>
@@ -63,4 +77,3 @@
     </div>
   </body>
 </html>
-          

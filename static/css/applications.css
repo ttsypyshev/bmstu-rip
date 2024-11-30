@@ -1,44 +1,21 @@
-:root {
-  --font-family-default: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Ubuntu', 'Cantarell', 'Noto Sans', sans-serif, 'BlinkMacSystemFont', 'Helvetica Neue', Arial;
-  --font-family-mono: 'PT Mono', monospace;
-  
-  --color-background-dark: #0d1117;
-  --color-background-light: #212830;
-  --color-background-medium: #6f6f6f;
-  --color-background-lightest: #ababab;
-  --color-background-darkest: #212830;
-  --color-background-code: #151b23;
-  --color-text-light: #ffffff;
-  --color-text-dark: #000000;
-  --color-btn-back: #238636;
-  --color-border: #ffffff;
-
-  --font-size-default: 16px;
-  --font-size-large: 20px;
-  --font-size-small: 14px;
-  
-  --line-height-default: 1.5;
-  --line-height-small: 1.4;
-  
-  --border-radius-default: 15px;
-  --border-radius-large: 25px;
-  --font-weight-regular: 400;
-  --font-weight-bold: 700;
-}
-
+/* General Styles */
 body {
-  background-color: var(--color-background-dark);
+  background-color: var(--background-color-darkest);
   margin: 0;
   padding: 0;
 }
 
+/* Writing Code Section */
 .writing-code {
   width: 100%;
   min-height: 100vh;
   position: relative;
 }
 
-.header, .icon-btn-back, .background-btn-back {
+/* Header Styles */
+.header,
+.icon-btn-back,
+.background-btn-back {
   position: absolute;
 }
 
@@ -47,7 +24,7 @@ body {
   height: 70px;
   top: 58px;
   left: 89px;
-  border-radius: 5px;
+  border-radius: var(--border-radius-sm);
 }
 
 .icon-btn-back {
@@ -62,18 +39,19 @@ body {
   height: 70px;
   top: 0;
   left: 0;
-  background-color: var(--color-background-lightest);
-  border-radius: 5px;
+  background-color: var(--background-color-lightest);
+  border-radius: var(--border-radius-xs);
 }
 
+/* Code Tree Styles */
 .tree {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  flex-direction: row;
   position: relative;
-  top: 200px;
-  align-items: center;
-  width: 100%;
+  top: 180px;
+  align-items: flex-start;
+  max-width: 1900px;
+  margin: 0 auto;
 }
 
 ul {
@@ -82,15 +60,15 @@ ul {
 }
 
 .code {
-  position: relative;
   width: 1150px;
-  background-color: var(--color-background-light);
-  border-radius: var(--border-radius-default);
+  background-color: var(--background-color-dark);
+  border-radius: var(--border-radius-sm);
   display: flex;
   flex-direction: column;
   margin-bottom: 50px;
 }
 
+/* Language Container */
 .lang-container {
   display: flex;
   align-items: center;
@@ -100,34 +78,33 @@ ul {
   width: 50px;
   height: 50px;
   object-fit: cover;
-  margin-left: 10px;
-  margin-right: 10px;
+  margin: 5px 10px;
 }
 
 .text-lang {
-  font-family: "Inter", var(--font-family-default);
-  color: var(--color-text-light);
-  font-size: var(--font-size-default);
+  font-family: var(--font-family-default);
+  color: var(--text-color-light);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
-  line-height: 45px;
+  line-height: var(--line-height-lg);
   text-align: left;
   white-space: nowrap;
-  letter-spacing: 0;
 }
 
+/* Code Background */
 .background-code {
-  background-color: var(--);;
-  border: 1px solid var(--color-border);
-  border-radius: 0 0 var(--border-radius-default) var(--border-radius-default);
+  background-color: var(--background-color-code);
+  border: 1px solid var(--text-color-light);
+  border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
   display: flex;
   flex-direction: row;
-  gap: 20px;
 }
 
+/* Text Lines */
 .text-lines {
   font-family: var(--font-family-mono);
-  color: var(--color-text-light);
-  font-size: var(--font-size-default);
+  color: var(--text-color-light);
+  font-size: var(--font-size-sm);
   line-height: var(--line-height-small);
   text-align: right;
   white-space: nowrap;
@@ -135,12 +112,13 @@ ul {
   margin-left: 10px;
 }
 
+/* Write Code Field */
 .field-write-code {
   flex-grow: 1;
   background-color: transparent;
   font-family: var(--font-family-mono);
-  color: var(--color-text-light);
-  font-size: var(--font-size-default);
+  color: var(--text-color-light);
+  font-size: var(--font-size-sm);
   line-height: var(--line-height-small);
   border: none;
   outline: none;
@@ -149,28 +127,90 @@ ul {
   padding-left: 10px;
 }
 
+/* Tech Info Text */
 .text-tech-info {
   font-family: var(--font-family-mono);
-  font-size: var(--font-size-small);
-  color: var(--color-text-light);
-  margin-top: 700px;
-  margin-right: 10px;
+  font-size: var(--font-size-xs);
+  color: var(--text-color-light);
+  margin: 790px 15px 5px 0;
   text-align: right;
 }
 
+/* Error Message */
 .error {
-  text-align: center;
-  background-color: var(--color-background-darkest);
-  color: var(--color-text-light);
+  position: absolute;
+  left: 35%;
+  top: 100px;
+  background-color: var(--background-color-dark);
+  color: var(--text-color-light);
   padding: 30px;
-  border-radius: var(--border-radius-default);
-  max-width: 400px;
+  border-radius: var(--border-radius-sm);
+  max-width: 500px;
 }
 
+/* Header Styles */
 h1 {
-  font-family: "Inter", var(--font-family-default);
-  font-size: var(--font-size-default);
-  line-height: var(--line-height-default);
+  font-family: var(--font-family-default);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-lg);
   font-weight: var(--font-weight-bold);
   margin: 0;
+}
+
+/* Info Box */
+.info-box {
+  position: sticky;
+  top: 20px;
+  margin-top: 20px;
+  left: calc(50% + 750px);
+  transform: translateX(-50%);
+  width: 250px;
+  background-color: var(--background-color-medium);
+  border-radius: var(--border-radius-sm);
+  padding: 15px;
+  z-index: 1000;
+}
+
+/* Project Buttons */
+.project-btn {
+  width: 230px;
+  height: 40px;
+  margin-left: 5px;
+  background-color: var(--background-color-light);
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+  border: 1px solid var(--border-color-dark);
+}
+
+.save-project-btn {
+  margin-bottom: 10px;
+}
+
+.project-btn:hover {
+  transform: scale(1.05);
+  border: none;
+  outline: none;
+}
+
+.save-project-btn:hover {
+  background-color: var(--background-color-green);
+}
+
+.delete-project-btn:hover {
+  background-color: var(--background-color-red);
+}
+
+/* Button Text Styles */
+.save-project-button-text,
+.delete-project-button-text {
+  font-family: var(--font-family-default);
+  color: var(--text-color-dark);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-large);
+  white-space: nowrap;
 }
