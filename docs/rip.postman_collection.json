@@ -1,0 +1,993 @@
+{
+	"info": {
+		"_postman_id": "99bee5df-e9a1-46b0-a742-20c5aff7a772",
+		"name": "rip",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39492301"
+	},
+	"item": [
+		{
+			"name": "lang",
+			"item": [
+				{
+					"name": "GetLangList",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `",
+									"<style type=\"text/css\">",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}",
+									"    .tftable tr {background-color:#ffffff;}",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}",
+									"    .tftable tr:hover {background-color:#e0ffff;}",
+									"</style>",
+									"",
+									"<table class=\"tftable\" border=\"1\">",
+									"    <tr>",
+									"        <th>ID</th>",
+									"        <th>Name</th>",
+									"        <th>ShortDescription</th>",
+									"        <th>Description</th>",
+									"        <th>ImgLink</th>",
+									"        <th>Author</th>",
+									"        <th>Year</th>",
+									"        <th>Version</th>",
+									"        <th>List</th>",
+									"        <th>Status</th>",
+									"    </tr>",
+									"    ",
+									"    {{#each response.langs}}",
+									"        <tr>",
+									"            <td>{{ID}}</td>",
+									"            <td>{{Name}}</td>",
+									"            <td>{{ShortDescription}}</td>",
+									"            <td>{{Description}}</td>",
+									"            <td>{{ImgLink}}</td>",
+									"            <td>{{Author}}</td>",
+									"            <td>{{Year}}</td>",
+									"            <td>{{Version}}</td>",
+									"            <td>{{List}}</td>",
+									"            <td>{{Status}}</td>",
+									"        </tr>",
+									"    {{/each}}",
+									"</table>",
+									"`;",
+									"",
+									"function constructVisualizerPayload() {",
+									"    return {response: pm.response.json()}",
+									"}",
+									"",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/info?langname=python",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"info"
+							],
+							"query": [
+								{
+									"key": "langname",
+									"value": "python"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetLangByID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/info/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"info",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateLang",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"test\",\n  \"short_description\": \"test\",\n  \"description\": \"test\",\n  \"author\": \"test\",\n  \"year\": \"test\",\n  \"version\": \"test\",\n  \"list\": {\n    \"test1\": \"1\",\n    \"test2\": \"2\",\n    \"test3\": \"3\",\n    \"test4\": \"4\",\n    \"test5\": \"5\",\n    \"test6\": \"6\"\n  }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/info",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"info"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateLang",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"test1\",\n  \"short_description\": \"test1\",\n  \"description\": \"test1\",\n  \"author\": \"test1\",\n  \"year\": \"test\",\n  \"version\": \"test1\",\n  \"list\": {\n    \"test1\": \"11\",\n    \"test2\": \"21\",\n    \"test3\": \"31\",\n    \"test4\": \"41\",\n    \"test5\": \"51\",\n    \"test6\": \"61\"\n  }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/info/7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"info",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateLangImage",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/home/ttsypyshev/data/other/forest_illustration-wallpaper-3440x1440.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8080/info/7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"info",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteLang",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/info/7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"info",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddLangToDraft",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODQyNjIsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.u3IgWoC-25XtkzFtzJB7XsK670RGahALCFqyfZiz-SA",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"id_lang\":2}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/info/add-service",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"info",
+								"add-service"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "project",
+			"item": [
+				{
+					"name": "GetProjectList",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/project",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"project"
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2023-01-01",
+									"disabled": true
+								},
+								{
+									"key": "end_date",
+									"value": "2024-12-31",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "rejected",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetProjectByID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/project/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"project",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateProject",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\":\"draft\",\n    \"comment\":\"test\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/project/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"project",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SubmitProject",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODQyNjIsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.u3IgWoC-25XtkzFtzJB7XsK670RGahALCFqyfZiz-SA",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/project/7/submit",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"project",
+								"7",
+								"submit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CompleteProject",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODQzMTMsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOiIwMjE4ZmQ0ZS0wNTAxLTRjOTYtOWViMy1mY2RiOTExODEyZTYifQ.rqolf1F7NG2gLdgXGaaXPctoRzauUf_GtdH7s3c5pkM",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"completed\",\n  \"comment\": \"Project completed successfully.\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/project/7/complete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"project",
+								"7",
+								"complete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteProject",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"file_codes\": {\n    \"3\": \"file_code_11\",\n    \"4\": \"file_code_21\",\n    \"5\": \"file_code_31\"\n  }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/project/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"project",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "file",
+			"item": [
+				{
+					"name": "DeleteFileFromProject",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"project_id\": 4,\n  \"lang_id\": 2\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/file/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"file",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateFileInProject",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"project_id\": 4,\n  \"lang_id\": 1,\n  \"code\": \"example_code\",\n  \"filename\": \"1\",\n  \"comment\": \"test\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/file/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"file",
+								"update"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "RegisterUser",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe1\",\n  \"email\": \"test@test.com\",\n  \"login\": \"johndoe1\",\n  \"password\": \"securepassword123\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/user/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateUserProfile",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jane Doe 1\",\n  \"email\": \"test@test.com\",\n  \"password\": \"newsecurepassword456\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/user/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"user",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UserLogin",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// {\n//   \"login\": \"admin1\",\n//   \"password\": \"password123\"\n// }\n\n{\n  \"login\": \"user1\",\n  \"password\": \"userPass123\"\n}\n\n// {\n//   \"login\": \"johndoe1\",\n//   \"password\": \"securepassword123\"\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/user/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "AdminLogin",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"login\": \"admin1\",\n  \"password\": \"password123\"\n}\n\n// {\n//   \"login\": \"user1\",\n//   \"password\": \"userPass123\"\n// }\n\n// {\n//   \"login\": \"johndoe1\",\n//   \"password\": \"securepassword123\"\n// }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/user/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"user",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 30 Nov 2024 20:29:10 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "260"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"expires_in\": 86400000000000,\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODQ5NTAsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOiIwMjE4ZmQ0ZS0wNTAxLTRjOTYtOWViMy1mY2RiOTExODEyZTYifQ.Baq_eHYHBiI0knWc26_VcuQ-DxTRlyWviY_wfZyocoo\",\n    \"token_type\": \"Bearer\"\n}"
+						},
+						{
+							"name": "UserLogin",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// {\n//   \"login\": \"admin1\",\n//   \"password\": \"password123\"\n// }\n\n{\n  \"login\": \"user1\",\n  \"password\": \"userPass123\"\n}\n\n// {\n//   \"login\": \"johndoe1\",\n//   \"password\": \"securepassword123\"\n// }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/user/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"user",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 30 Nov 2024 20:29:33 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "262"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"expires_in\": 86400000000000,\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODQ5NzMsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.nyiKnWhB6xVZl7OCJSNhj5kKYQWqs8RI2BIzA-Sp02I\",\n    \"token_type\": \"Bearer\"\n}"
+						}
+					]
+				},
+				{
+					"name": "UserLogout",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzMwODM5MjYsInJvbGUiOiJzdHVkZW50IiwidXNlcl9pZCI6IjM4NzlkNjNjLTczMmUtNGU5YS04N2MyLTA0MmFkMjQ5MTJlMyJ9.qWzHxFB-bqyajQZXh2DDhMG_-S0JAgqw1eZ4fQ7LIf8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/user/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"user",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

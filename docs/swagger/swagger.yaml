@@ -1,0 +1,1047 @@
+basePath: /
+definitions:
+  backend.AddServiceRequest:
+    properties:
+      id_lang:
+        example: 3
+        type: integer
+    type: object
+  backend.CompleteProjectRequest:
+    properties:
+      comment:
+        example: Project successfully completed
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/database.Status'
+        example: completed
+    type: object
+  backend.CreateServiceRequest:
+    properties:
+      author:
+        example: John Doe
+        type: string
+      description:
+        example: This is a detailed description of the service and its features
+        type: string
+      list:
+        additionalProperties:
+          type: string
+        example:
+          item1: "10"
+          item2: "20"
+          item3: "30"
+          item4: "40"
+        type: object
+      name:
+        example: Example Service
+        type: string
+      short_description:
+        example: This is a short description of the service
+        type: string
+      version:
+        example: 1.0.0
+        type: string
+      year:
+        example: "2024"
+        type: string
+    type: object
+  backend.DeleteFileRequest:
+    properties:
+      lang_id:
+        example: 2
+        type: integer
+      project_id:
+        example: 4
+        type: integer
+    type: object
+  backend.DeleteProjectRequest:
+    properties:
+      file_codes:
+        additionalProperties:
+          type: string
+        example:
+          "6": file_code_1
+          "7": file_code_2
+          "8": file_code_3
+        type: object
+    type: object
+  backend.ErrorResponse:
+    properties:
+      message:
+        example: '[err] invalid request format'
+        type: string
+      status:
+        example: false
+        type: boolean
+    type: object
+  backend.RegisterUserRequest:
+    properties:
+      email:
+        example: johndoe@example.com
+        type: string
+      login:
+        example: johndoe123
+        type: string
+      name:
+        example: John Doe
+        type: string
+      password:
+        example: newsecurepassword456
+        type: string
+    type: object
+  backend.SubmitProjectRequest:
+    properties:
+      file_codes:
+        additionalProperties:
+          type: string
+        example:
+          "6": file_code_1
+          "7": file_code_2
+          "8": file_code_3
+        type: object
+    type: object
+  backend.UpdateFileRequest:
+    properties:
+      code:
+        example: function processData() {...}
+        type: string
+      comment:
+        example: Refactored the data processing function
+        type: string
+      filename:
+        example: dataProcessor.js
+        type: string
+      lang_id:
+        example: 1
+        type: integer
+      project_id:
+        example: 4
+        type: integer
+    type: object
+  backend.UpdateProjectRequest:
+    properties:
+      comment:
+        example: Updated project status to draft
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/database.Status'
+        example: draft
+    type: object
+  backend.UpdateServiceRequest:
+    properties:
+      author:
+        example: Jane Smith
+        type: string
+      description:
+        example: Updated detailed description of the service
+        type: string
+      list:
+        additionalProperties:
+          type: string
+        example:
+          item1: "15"
+          item2: "25"
+          item3: "35"
+          item4: "45"
+        type: object
+      name:
+        example: Updated Service Name
+        type: string
+      short_description:
+        example: Updated short description
+        type: string
+      version:
+        example: 2.0.0
+        type: string
+      year:
+        example: "2025"
+        type: string
+    type: object
+  backend.UpdateUserProfileRequest:
+    properties:
+      email:
+        example: test@test.com
+        type: string
+      name:
+        example: Jane Doe 1
+        type: string
+      password:
+        example: newsecurepassword456
+        type: string
+    type: object
+  backend.UserLoginRequest:
+    properties:
+      login:
+        example: user1
+        type: string
+      password:
+        example: userPass123
+        type: string
+    type: object
+  backend.UserLoginResponse:
+    properties:
+      access_token:
+        example: JWT_TOKEN
+        type: string
+      expires_in:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        example: 86400
+      token_type:
+        example: Bearer
+        type: string
+    type: object
+  database.File:
+    properties:
+      Lang:
+        $ref: '#/definitions/database.Lang'
+      autoCheck:
+        type: integer
+      code:
+        type: string
+      comment:
+        type: string
+      fileName:
+        type: string
+      fileSize:
+        type: integer
+      id:
+        type: integer
+      langID:
+        type: integer
+      projectID:
+        type: integer
+    type: object
+  database.JSONB:
+    additionalProperties:
+      type: string
+    type: object
+  database.Lang:
+    properties:
+      author:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      imgLink:
+        type: string
+      list:
+        $ref: '#/definitions/database.JSONB'
+      name:
+        type: string
+      shortDescription:
+        type: string
+      status:
+        type: boolean
+      version:
+        type: string
+      year:
+        type: string
+    type: object
+  database.Project:
+    description: Project represents a project in the system
+    properties:
+      Moderator:
+        $ref: '#/definitions/database.User'
+      User:
+        $ref: '#/definitions/database.User'
+      completionTime:
+        type: string
+      creationTime:
+        type: string
+      formationTime:
+        type: string
+      id:
+        type: integer
+      moderatorComment:
+        type: string
+      moderatorID:
+        type: string
+      status:
+        $ref: '#/definitions/database.Status'
+      userID:
+        type: string
+    type: object
+  database.Role:
+    enum:
+    - admin
+    - student
+    - none
+    type: string
+    x-enum-varnames:
+    - Admin
+    - Student
+    - None
+  database.Status:
+    enum:
+    - draft
+    - deleted
+    - created
+    - completed
+    - rejected
+    type: string
+    x-enum-varnames:
+    - Draft
+    - Deleted
+    - Created
+    - Completed
+    - Rejected
+  database.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+      name:
+        type: string
+      role:
+        $ref: '#/definitions/database.Role'
+    type: object
+  gin.H:
+    additionalProperties: {}
+    type: object
+  time.Duration:
+    enum:
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    type: integer
+    x-enum-varnames:
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
+host: localhost:8080
+info:
+  contact:
+    email: ttsypyshev01@gmail.com
+    name: ttsypyshev
+    url: https://vk.com/ttsypyshev
+  description: Bmstu Open IT Platform
+  license:
+    name: AS IS (NO WARRANTY)
+  title: BITOP
+  version: "1.0"
+paths:
+  /file/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a file from a project based on the provided project ID
+        and language ID. Only the project owner can delete files from their project.
+      parameters:
+      - description: File deletion request data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend.DeleteFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File successfully deleted from project
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request format or missing fields
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "403":
+          description: User is not the project owner
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Project or file not found
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Delete a file from a project
+      tags:
+      - Files
+  /file/update:
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of a file within a project. The user must be
+        the owner of the project to update the file.
+      parameters:
+      - description: File update request data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend.UpdateFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File successfully updated in project
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request format or missing fields
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "403":
+          description: User is not the project owner
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Project or file not found
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Update a file in a project
+      tags:
+      - Files
+  /info:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of languages filtered by the specified query and
+        details of the user's most recent draft project, including its ID and count.
+      parameters:
+      - description: Language name to filter the list of services
+        in: query
+        name: langname
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of filtered languages, draft project ID, and project count
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "401":
+          description: Unauthorized access
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Draft project not found
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Get a list of filtered languages and related project information
+      tags:
+      - Services
+    post:
+      consumes:
+      - application/json
+      description: Creates a new language service with the provided details and saves
+        it to the database.
+      parameters:
+      - description: Service creation details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/backend.CreateServiceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Service successfully created
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid input data
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Create a new language service
+      tags:
+      - Services
+  /info/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a language service and its associated image from MinIO.
+        If the service is not found, an error will be returned.
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service deleted successfully
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid service ID format
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Service not found
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Delete a language service by ID
+      tags:
+      - Services
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the details of a language based on the provided language
+        ID.
+      parameters:
+      - description: Language ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Language details
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid language ID format
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Language not found
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Get details of a language by its ID
+      tags:
+      - Services
+    post:
+      consumes:
+      - multipart/form-data
+      description: Updates the image of an existing language service identified by
+        the provided service ID.
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service image updated successfully
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid service ID or missing image file
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Service not found
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Update the image of an existing language service
+      tags:
+      - Services
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an existing language service based on the
+        provided ID and request data.
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service update details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/backend.UpdateServiceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service successfully updated
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid input data
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Service not found
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Update an existing language service
+      tags:
+      - Services
+  /info/add-service:
+    post:
+      consumes:
+      - application/json
+      description: Adds a service to a draft project. This endpoint expects a service
+        ID and creates a new project for the user, adding the specified service to
+        the draft.
+      parameters:
+      - description: Service request data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend.AddServiceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service successfully added to draft
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request format or missing fields
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Add a service to a project draft
+      tags:
+      - Services
+  /project:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of projects filtered by start date, end date, and status
+      parameters:
+      - description: Start Date in YYYY-MM-DD format
+        in: query
+        name: start_date
+        type: string
+      - description: End Date in YYYY-MM-DD format
+        in: query
+        name: end_date
+        type: string
+      - description: Status of the project
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of projects
+          schema:
+            items:
+              $ref: '#/definitions/database.Project'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Get list of projects
+      tags:
+      - Projects
+  /project/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Marks a project as deleted, but only if the project has no formation
+        date. The user must be the owner of the project to delete it. Optionally,
+        file codes associated with the project can be updated before deletion.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request payload for deleting a project
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend.DeleteProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted the project
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request format or project status, formation date exists
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "401":
+          description: Unauthorized access
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Project not found or project does not belong to the user
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Delete a project by updating its status to "deleted"
+      tags:
+      - Projects
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a project, including associated
+        files, by project ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of files associated with the project
+          schema:
+            items:
+              $ref: '#/definitions/database.File'
+            type: array
+        "400":
+          description: Invalid project ID format
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Project or files not found
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Get details of a specific project by ID
+      tags:
+      - Projects
+    put:
+      consumes:
+      - application/json
+      description: Update the status and comment of a project by its ID. The user
+        must be the owner of the project to update it.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request payload for updating project
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend.UpdateProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated project
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request format or status
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "401":
+          description: Unauthorized access
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Project not found or project does not belong to the user
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Update an existing project
+      tags:
+      - Projects
+  /project/{id}/complete:
+    put:
+      consumes:
+      - application/json
+      description: Mark a project as completed or rejected, and provide an optional
+        comment. The user must be the owner of the project to complete it. The project
+        must have a formation date set to be completed.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request payload for completing or rejecting a project
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend.CompleteProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully completed or rejected the project
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request format, project status, or missing formation
+            date
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "401":
+          description: Unauthorized access
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Project not found
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Complete or reject a project with a status and comment
+      tags:
+      - Projects
+  /project/{id}/submit:
+    put:
+      consumes:
+      - application/json
+      description: Submit a project by updating associated file codes and setting
+        its status to "Created". The user must be the owner of the project to submit
+        it.
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request payload for submitting project
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend.SubmitProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully submitted the project
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request format or project ID
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "401":
+          description: Unauthorized access
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: Project not found or project does not belong to the user
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Submit a project by updating files and status
+      tags:
+      - Projects
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates the user and returns a JWT token on successful login.
+      parameters:
+      - description: User login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User login successful and JWT token generated
+          schema:
+            $ref: '#/definitions/backend.UserLoginResponse'
+        "400":
+          description: Invalid login or password
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Failed to generate or save session
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: User login
+      tags:
+      - Users
+  /user/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logs the user out by deleting the session and clearing the authentication
+        token from the cookie.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User logged out successfully
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Failed to clear session
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "401":
+          description: 'Unauthorized: User not authenticated'
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: User logout
+      tags:
+      - Users
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint registers a new user by accepting a JSON payload
+        with the user's details (name, email, login, password).
+      parameters:
+      - description: User registration data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend.RegisterUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request format or user registration failed
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Registers a new user
+      tags:
+      - Users
+  /user/update:
+    put:
+      consumes:
+      - application/json
+      description: This endpoint allows users to update their profile details (name,
+        email, password).
+      parameters:
+      - description: User profile update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend.UpdateUserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile updated successfully
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request format or update failed
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/backend.ErrorResponse'
+      summary: Updates user profile
+      tags:
+      - Users
+schemes:
+- http
+swagger: "2.0"

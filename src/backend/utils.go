@@ -1,13 +1,13 @@
 package backend
 
 import (
+	"errors"
 	"fmt"
 	"log"
-	"os"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -30,19 +30,15 @@ func ParseList(listStr string) map[string]string {
 	return result
 }
 
-// FromEnv собирает DSN строку из переменных окружения
-func FromEnv() string {
-	host := os.Getenv("DB_HOST")
-	if host == "" {
-		return ""
-	}
+func extractObjectNameFromURL(url string) string {
+	// Извлекаем имя объекта из URL (например, "service_images/filename.jpg")
+	parts := strings.Split(url, "/")
+	return parts[len(parts)-1]
+}
 
-	port := os.Getenv("DB_PORT")
-	user := os.Getenv("DB_USER")
-	pass := os.Getenv("DB_PASS")
-	dbname := os.Getenv("DB_NAME")
-
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
+type ErrorResponse struct {
+	Message string `json:"message" example:"[err] invalid request format"`
+	Status  bool   `json:"status" example:"false"`
 }
 
 // handleError обрабатывает и логирует ошибки, отправляет ответ
@@ -52,7 +48,7 @@ func handleError(c *gin.Context, statusCode int, err error, additionalErrs ...er
 		return
 	}
 
-	c.JSON(statusCode, gin.H{"status": false, "message": err.Error()})
+	c.JSON(statusCode, ErrorResponse{Status: false, Message: err.Error()})
 
 	var errorMessages strings.Builder
 	errorMessages.WriteString(err.Error())
@@ -65,19 +61,38 @@ func handleError(c *gin.Context, statusCode int, err error, additionalErrs ...er
 	log.Printf("Error: %s", errorMessages.String())
 }
 
-func ParseQueryParam(c *gin.Context, key string) (int, error) {
-	param := c.Query(key)
-	if param == "" {
-		return 0, nil
-	}
-	return strconv.Atoi(param)
-}
+// func ParseQueryParam(c *gin.Context, key string) (int, error) {
+// 	param := c.Query(key)
+// 	if param == "" {
+// 		return 0, nil
+// 	}
+// 	return strconv.Atoi(param)
+// }
 
 func (app *App) GetFilteredLangs(query string) ([]DbLang, error) {
 	if query != "" {
-		return app.FilterLangsByQuery(query)
+		return app.filterLangsByQuery(query)
 	}
-	return app.GetLangs(func(db *gorm.DB) *gorm.DB {
+	return app.getLangs(func(db *gorm.DB) *gorm.DB {
 		return db.Where("status = ?", true)
 	})
+}
+
+func ExtractUserID(c *gin.Context) (uuid.UUID, error) {
+	idAny, exists := c.Get("userID")
+	if !exists {
+		return uuid.Nil, errors.New("userID is missing from context")
+	}
+
+	idStr, ok := idAny.(string)
+	if !ok {
+		return uuid.Nil, fmt.Errorf("expected string for userID, but got %T", idAny)
+	}
+
+	userID, err := uuid.Parse(idStr)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid UUID format for userID: %v", err)
+	}
+
+	return userID, nil
 }
