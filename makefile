@@ -41,8 +41,8 @@ kill_process:
 # Сборка Go-программы
 backend_build: swag
 	@echo "Сборка Go-программы..."
-	@go build -v -o $(EXECUTABLE) $(SRC_DIR)/main.go
-	@echo "Сборка завершена. Программа сохранена в $(EXECUTABLE)."
+	@go build -v -o $(BACKEND_BUILD_DIR)/$(BACKEND_NAME) $(SRC_DIR)/main.go
+	@echo "Сборка завершена. Программа сохранена в $(BACKEND_BUILD_DIR)/$(BACKEND_NAME)."
 
 # Запуск Go-программы
 # backend_run: kill_process backend_build
